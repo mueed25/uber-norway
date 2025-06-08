@@ -1,0 +1,72 @@
+uber-clone-mcp/
+├── app.js                          # Main Express application entry point
+├── package.json                    # Project dependencies and scripts
+├── .env                           # Environment variables
+├── .gitignore                     # Git ignore file
+├── README.md                      # Project documentation
+│
+├── config/                        # Configuration files
+│   ├── database.js               # MongoDB connection setup
+│   └── config.js                 # General app configuration
+│
+├── models/                        # Data models (MCP - Model layer)
+│   ├── Trip.js                   # Trip booking model
+│   └── User.js                   # User model (future expansion)
+│
+├── controllers/                   # Route controllers (MCP - Controller layer)
+│   ├── homeController.js         # Home page logic
+│   ├── tripController.js         # Trip booking logic
+│   └── baseController.js         # Base controller with common methods
+│
+├── presenters/                    # View presenters (MCP - Presenter layer)
+│   ├── homePresenter.js          # Home page data presentation
+│   ├── tripPresenter.js          # Trip data presentation
+│   └── basePresenter.js          # Base presenter with common methods
+│
+├── routes/                        # Express routes
+│   ├── index.js                  # Main routes
+│   ├── home.js                   # Home routes
+│   └── trip.js                   # Trip routes
+│
+├── middlewares/                   # Custom middleware
+│   ├── auth.js                   # Authentication middleware
+│   └── validation.js             # Input validation middleware
+│
+├── utils/                         # Utility functions
+│   ├── helpers.js                # Handlebars helpers
+│   └── constants.js              # App constants
+│
+├── views/                         # Handlebars templates
+│   ├── layouts/                  # Layout templates
+│   │   └── main.hbs             # Main layout template
+│   ├── partials/                 # Partial templates
+│   │   ├── header.hbs           # Header component
+│   │   ├── footer.hbs           # Footer component
+│   │   └── map.hbs              # Map component
+│   ├── home.hbs                 # Home page template
+│   ├── trip.hbs                 # Trip booking template
+│   └── error.hbs                # Error page template
+│
+└── public/                        # Static assets
+    ├── css/                      # Compiled CSS
+    │   └── style.css
+    ├── scss/                     # Sass source files
+    │   ├── main.scss
+    │   ├── components/
+    │   │   ├── _header.scss
+    │   │   ├── _map.scss
+    │   │   ├── _forms.scss
+    │   │   └── _buttons.scss
+    │   ├── layout/
+    │   │   ├── _grid.scss
+    │   │   └── _containers.scss
+    │   └── utils/
+    │       ├── _variables.scss
+    │       ├── _mixins.scss
+    │       └── _responsive.scss
+    ├── js/                       # Client-side JavaScript
+    │   ├── main.js
+    │   ├── map.js
+    │   └── forms.js
+    ├── images/                   # Image assets
+    └── favicon.ico              # Favicon

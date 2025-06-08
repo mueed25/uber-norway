@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Go anywhere with Uber Clone - Book your ride easily">
+    <meta name="keywords" content="uber, ride, taxi, booking, transportation">
+    <title>{{title}}</title>
+    
+    <!-- Preconnect to Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body class="{{bodyClass}}">
+    <!-- Header -->
+    {{> header}}
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        {{{body}}}
+    </main>
+    
+    <!-- Footer -->
+    {{> footer}}
+    
+    <!-- Google Maps API -->
+    {{#if mapConfig}}
+    <script>
+        window.mapConfig = {{{json mapConfig}}};
+        window.googleMapsApiKey = '{{apiKey}}';
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{apiKey}}&libraries=places&callback=initMap"></script>
+    {{/if}}
+    
+    <!-- Main JavaScript -->
+    <script src="/js/main.js"></script>
+    
+    {{#if page}}
+    <!-- Page-specific JavaScript -->
+    <script src="/js/{{page}}.js"></script>
+    {{/if}}
+</body>
+</html>

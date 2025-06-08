@@ -1,0 +1,28 @@
+{
+  "name": "uber-norway",
+  "version": "1.0.0",
+  "description": "Uber-inspired trip booking app ",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "sass": "sass --watch public/scss:public/css"
+  },
+  "keywords": ["express", "handlebars", "mongodb", "mcp", "uber-clone"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-handlebars": "^7.1.2",
+    "mongoose": "^8.0.3",
+    "dotenv": "^16.3.1",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "sass": "^1.69.5"
+  }
+}

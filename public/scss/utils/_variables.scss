@@ -1,0 +1,160 @@
+// === COLORS === //
+
+// Primary Brand Colors
+$primary-black: #000000;
+$primary-white: #ffffff;
+$uber-gray: #f6f6f6;
+
+// Semantic Colors
+$success: #4CAF50;
+$error: #f44336;
+$warning: #ff9800;
+$info: #2196f3;
+
+// Grayscale
+$gray-50: #fafafa;
+$gray-100: #f5f5f5;
+$gray-200: #eeeeee;
+$gray-300: #e0e0e0;
+$gray-400: #bdbdbd;
+$gray-500: #9e9e9e;
+$gray-600: #757575;
+$gray-700: #616161;
+$gray-800: #424242;
+$gray-900: #212121;
+
+// Text Colors
+$text-primary: $primary-black;
+$text-secondary: $gray-600;
+$text-muted: $gray-500;
+$text-white: $primary-white;
+
+// Background Colors
+$bg-primary: $primary-white;
+$bg-secondary: $uber-gray;
+$bg-dark: $primary-black;
+
+// Border Colors
+$border-light: $gray-200;
+$border-medium: $gray-300;
+$border-dark: $gray-400;
+
+// === TYPOGRAPHY === //
+
+// Font Families
+$font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-mono: 'SF Mono', Monaco, 'Cascadia Mono', 'Roboto Mono', Consolas, 'Courier New', monospace;
+
+// Font Weights
+$font-light: 300;
+$font-normal: 400;
+$font-medium: 500;
+$font-semibold: 600;
+$font-bold: 700;
+
+// Font Sizes
+$font-xs: 0.75rem;    // 12px
+$font-sm: 0.875rem;   // 14px
+$font-base: 1rem;     // 16px
+$font-lg: 1.125rem;   // 18px
+$font-xl: 1.25rem;    // 20px
+$font-2xl: 1.5rem;    // 24px
+$font-3xl: 1.875rem;  // 30px
+$font-4xl: 2.25rem;   // 36px
+$font-5xl: 3rem;      // 48px
+
+// Line Heights
+$leading-tight: 1.25;
+$leading-normal: 1.5;
+$leading-relaxed: 1.75;
+
+// === SPACING === //
+
+// Base spacing unit
+$spacing-unit: 0.25rem; // 4px
+
+// Spacing scale
+$space-0: 0;
+$space-1: #{$spacing-unit};     // 4px
+$space-2: #{$spacing-unit * 2}; // 8px
+$space-3: #{$spacing-unit * 3}; // 12px
+$space-4: #{$spacing-unit * 4}; // 16px
+$space-5: #{$spacing-unit * 5}; // 20px
+$space-6: #{$spacing-unit * 6}; // 24px
+$space-8: #{$spacing-unit * 8}; // 32px
+$space-10: #{$spacing-unit * 10}; // 40px
+$space-12: #{$spacing-unit * 12}; // 48px
+$space-16: #{$spacing-unit * 16}; // 64px
+$space-20: #{$spacing-unit * 20}; // 80px
+$space-24: #{$spacing-unit * 24}; // 96px
+
+// === LAYOUT === //
+
+// Containers
+$container-sm: 640px;
+$container-md: 768px;
+$container-lg: 1024px;
+$container-xl: 1280px;
+$container-2xl: 1536px;
+
+// Z-index scale
+$z-dropdown: 1000;
+$z-sticky: 1020;
+$z-fixed: 1030;
+$z-modal-backdrop: 1040;
+$z-modal: 1050;
+$z-popover: 1060;
+$z-tooltip: 1070;
+
+// === BREAKPOINTS === //
+
+$breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px
+);
+
+// === TRANSITIONS === //
+
+$transition-fast: 0.15s ease-in-out;
+$transition-normal: 0.3s ease-in-out;
+$transition-slow: 0.5s ease-in-out;
+
+// === BORDERS === //
+
+$border-width: 1px;
+$border-radius-sm: 4px;
+$border-radius: 8px;
+$border-radius-lg: 12px;
+$border-radius-xl: 16px;
+$border-radius-full: 9999px;
+
+// === SHADOWS === //
+
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+// === COMPONENT SPECIFIC === //
+
+// Header
+$header-height: 72px;
+$header-height-mobile: 64px;
+
+// Forms
+$input-height: 56px;
+$input-height-sm: 40px;
+$input-padding-x: $space-4;
+$input-padding-y: $space-4;
+
+// Buttons
+$btn-height: 48px;
+$btn-height-sm: 36px;
+$btn-height-lg: 56px;
+$btn-padding-x: $space-6;
+$btn-padding-y: $space-3;
