@@ -1,146 +1,137 @@
 <div class="home-container">
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
+    <!-- Left Panel - Booking Form -->
+    <div class="booking-section">
+        <!-- Hero Section -->
+        <section class="hero-section">
             <div class="hero-content">
                 <h1 class="hero-title">Go anywhere with Uber</h1>
                 <p class="hero-subtitle">Request a ride, hop in, and go.</p>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Main Booking Interface -->
-    <section class="booking-section">
-        <div class="container">
-            <div class="booking-layout">
-                <!-- Left Panel - Booking Form -->
-                <div class="booking-panel">
-                    <div class="booking-form-container">
-                        {{#if error}}
-                        <div class="alert alert-error">
-                            <p>{{error.message}}</p>
-                        </div>
-                        {{/if}}
-
-                        <form class="booking-form" action="/estimate" method="POST" id="tripForm">
-                            <!-- Pickup Location -->
-                            <div class="form-group">
-                                <label for="pickup" class="form-label">
-                                    <span class="location-icon pickup-icon"></span>
-                                    Pickup location
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="pickup" 
-                                    name="pickup" 
-                                    class="form-input location-input" 
-                                    placeholder="Enter pickup location"
-                                    value="{{formData.pickup}}"
-                                    required
-                                    autocomplete="off"
-                                >
-                            </div>
-
-                            <!-- Destination -->
-                            <div class="form-group">
-                                <label for="destination" class="form-label">
-                                    <span class="location-icon destination-icon"></span>
-                                    Where to?
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="destination" 
-                                    name="destination" 
-                                    class="form-input location-input" 
-                                    placeholder="Enter destination"
-                                    value="{{formData.destination}}"
-                                    required
-                                    autocomplete="off"
-                                >
-                            </div>
-
-                            <!-- Date and Time Row -->
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="date" class="form-label">Date</label>
-                                    <input 
-                                        type="date" 
-                                        id="date" 
-                                        name="date" 
-                                        class="form-input" 
-                                        value="{{formData.date}}"
-                                        required
-                                    >
-                                </div>
-                                <div class="form-group">
-                                    <label for="time" class="form-label">Time</label>
-                                    <input 
-                                        type="time" 
-                                        id="time" 
-                                        name="time" 
-                                        class="form-input" 
-                                        value="{{formData.time}}"
-                                        required
-                                    >
-                                </div>
-                            </div>
-
-                            <!-- Submit Button -->
-                            <button type="submit" class="btn btn-primary btn-large btn-full-width" id="seePricesBtn">
-                                See prices
-                            </button>
-                        </form>
-
-                        <!-- Trip Estimate Results -->
-                        {{#if tripEstimate}}
-                        <div class="trip-estimate">
-                            <div class="estimate-header">
-                                <h3>Trip Estimate</h3>
-                            </div>
-                            <div class="estimate-details">
-                                <div class="estimate-item">
-                                    <span class="estimate-label">Distance:</span>
-                                    <span class="estimate-value">{{tripEstimate.distance}} km</span>
-                                </div>
-                                <div class="estimate-item">
-                                    <span class="estimate-label">Duration:</span>
-                                    <span class="estimate-value">~{{tripEstimate.duration}} min</span>
-                                </div>
-                                <div class="estimate-item estimate-price">
-                                    <span class="estimate-label">Estimated Price:</span>
-                                    <span class="estimate-value price">{{tripEstimate.price}}</span>
-                                </div>
-                            </div>
-                            <button class="btn btn-success btn-large btn-full-width" id="bookTripBtn">
-                                Book Trip
-                            </button>
-                        </div>
-                        {{/if}}
-                    </div>
+        <!-- Booking Panel -->
+        <div class="booking-panel">
+            <div class="booking-form-container">
+                {{#if error}}
+                <div class="alert alert-error">
+                    <p>{{error.message}}</p>
                 </div>
+                {{/if}}
 
-                <!-- Right Panel - Map -->
-                <div class="map-panel">
-                    <div id="map" class="map-container"></div>
-                    {{#if tripEstimate}}
-                    <div class="map-overlay">
-                        <div class="route-info">
-                            <div class="route-points">
-                                <div class="route-point pickup">
-                                    <span class="point-icon"></span>
-                                    <span class="point-text">{{formData.pickup}}</span>
-                                </div>
-                                <div class="route-line"></div>
-                                <div class="route-point destination">
-                                    <span class="point-icon"></span>
-                                    <span class="point-text">{{formData.destination}}</span>
-                                </div>
-                            </div>
+                <form class="booking-form" action="/estimate" method="POST" id="tripForm">
+                    <!-- Pickup Location -->
+                    <div class="form-group">
+                        <span class="location-icon pickup-icon"></span>
+                        <input 
+                            type="text" 
+                            id="pickup" 
+                            name="pickup" 
+                            class="form-input location-input" 
+                            placeholder="Pickup location"
+                            value="{{formData.pickup}}"
+                            required
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <!-- Destination -->
+                    <div class="form-group">
+                        <span class="location-icon destination-icon"></span>
+                        <input 
+                            type="text" 
+                            id="destination" 
+                            name="destination" 
+                            class="form-input location-input" 
+                            placeholder="Where to?"
+                            value="{{formData.destination}}"
+                            required
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <!-- Date and Time Row -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input 
+                                type="date" 
+                                id="date" 
+                                name="date" 
+                                class="form-input" 
+                                value="{{formData.date}}"
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <input 
+                                type="time" 
+                                id="time" 
+                                name="time" 
+                                class="form-input" 
+                                value="{{formData.time}}"
+                                required
+                            >
                         </div>
                     </div>
-                    {{/if}}
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary btn-large btn-full-width" id="seePricesBtn">
+                        See prices
+                    </button>
+
+                    <!-- Login Link -->
+                    <p style="text-align: center; margin-top: 1rem; color: #616161; font-size: 0.875rem;">
+                        Log in to see your recent activity
+                    </p>
+                </form>
+
+                <!-- Trip Estimate Results -->
+                {{#if tripEstimate}}
+                <div class="trip-estimate">
+                    <div class="estimate-header">
+                        <h3>Trip Estimate</h3>
+                    </div>
+                    <div class="estimate-details">
+                        <div class="estimate-item">
+                            <span class="estimate-label">Distance:</span>
+                            <span class="estimate-value">{{tripEstimate.distance}} km</span>
+                        </div>
+                        <div class="estimate-item">
+                            <span class="estimate-label">Duration:</span>
+                            <span class="estimate-value">~{{tripEstimate.duration}} min</span>
+                        </div>
+                        <div class="estimate-item estimate-price">
+                            <span class="estimate-label">Estimated Price:</span>
+                            <span class="estimate-value price">{{tripEstimate.price}}</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-success btn-large btn-full-width" id="bookTripBtn">
+                        Book Trip
+                    </button>
+                </div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel - Map -->
+    <div class="map-section">
+        <div id="map" class="map-container"></div>
+        {{#if tripEstimate}}
+        <div class="map-overlay">
+            <div class="route-info">
+                <div class="route-points">
+                    <div class="route-point pickup">
+                        <span class="point-icon"></span>
+                        <span class="point-text">{{formData.pickup}}</span>
+                    </div>
+                    <div class="route-line"></div>
+                    <div class="route-point destination">
+                        <span class="point-icon"></span>
+                        <span class="point-text">{{formData.destination}}</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </section>
+        {{/if}}
+    </div>
 </div>

@@ -1,0 +1,60 @@
+// Alert Component Styles
+
+.alert {
+  padding: $space-4;
+  border-radius: $border-radius;
+  margin-bottom: $space-4;
+  border: 1px solid transparent;
+  
+  p {
+    margin: 0;
+    font-size: $font-sm;
+    font-weight: $font-medium;
+  }
+  
+  &.alert-error {
+    background-color: rgba($error, 0.1);
+    border-color: rgba($error, 0.2);
+    color: darken($error, 20%);
+  }
+  
+  &.alert-success {
+    background-color: rgba($success, 0.1);
+    border-color: rgba($success, 0.2);
+    color: darken($success, 20%);
+  }
+  
+  &.alert-warning {
+    background-color: rgba($warning, 0.1);
+    border-color: rgba($warning, 0.2);
+    color: darken($warning, 30%);
+  }
+  
+  &.alert-info {
+    background-color: rgba($info, 0.1);
+    border-color: rgba($info, 0.2);
+    color: darken($info, 20%);
+  }
+}
+
+// Form alert styles
+.form-alert {
+  @extend .alert;
+  position: relative;
+  
+  .alert-close {
+    position: absolute;
+    top: $space-2;
+    right: $space-2;
+    background: none;
+    border: none;
+    font-size: $font-lg;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
