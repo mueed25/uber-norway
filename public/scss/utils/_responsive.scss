@@ -1,0 +1,87 @@
+// Responsive Utilities
+
+// Container queries
+.container-responsive {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 $space-4;
+  
+  @include breakpoint(sm) {
+    max-width: $container-sm;
+    padding: 0 $space-6;
+  }
+  
+  @include breakpoint(md) {
+    max-width: $container-md;
+  }
+  
+  @include breakpoint(lg) {
+    max-width: $container-lg;
+    padding: 0 $space-8;
+  }
+  
+  @include breakpoint(xl) {
+    max-width: $container-xl;
+  }
+}
+
+// Responsive text sizes
+.text-responsive {
+  font-size: $font-sm;
+  
+  @include breakpoint(sm) {
+    font-size: $font-base;
+  }
+  
+  @include breakpoint(md) {
+    font-size: $font-lg;
+  }
+}
+
+// Responsive spacing
+.spacing-responsive {
+  padding: $space-2;
+  
+  @include breakpoint(sm) {
+    padding: $space-4;
+  }
+  
+  @include breakpoint(md) {
+    padding: $space-6;
+  }
+  
+  @include breakpoint(lg) {
+    padding: $space-8;
+  }
+}
+
+// Show/hide utilities for different breakpoints
+.show-xs { display: block; }
+.show-sm { display: none; }
+.show-md { display: none; }
+.show-lg { display: none; }
+.show-xl { display: none; }
+
+@include breakpoint(sm) {
+  .show-xs { display: none; }
+  .show-sm { display: block; }
+  .hide-sm { display: none; }
+}
+
+@include breakpoint(md) {
+  .show-sm { display: none; }
+  .show-md { display: block; }
+  .hide-md { display: none; }
+}
+
+@include breakpoint(lg) {
+  .show-md { display: none; }
+  .show-lg { display: block; }
+  .hide-lg { display: none; }
+}
+
+@include breakpoint(xl) {
+  .show-lg { display: none; }
+  .show-xl { display: block; }
+  .hide-xl { display: none; }
+}

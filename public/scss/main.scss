@@ -3,6 +3,8 @@
 
 // 1. Utils (variables, mixins, functions)
 @import 'utils/variables';
+@import 'utils/mixins';
+@import 'utils/responsive';
 
 // 2. Base styles
 @import 'base/reset';
@@ -15,9 +17,14 @@
 @import 'components/header';
 @import 'components/footer';
 @import 'components/map';
+@import 'components/alerts';
 
-// 4. Pages
+// 4. Layout
+@import 'layout/grid';
+@import 'layout/containers';
+
+// 5. Pages
 @import 'pages/home';
 
-// 5. Utilities
+// 6. Utilities
 @import 'utils/utilities';

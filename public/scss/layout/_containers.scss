@@ -1,0 +1,94 @@
+// Container Layouts
+
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 $space-4;
+  
+  @include breakpoint(sm) {
+    max-width: $container-sm;
+    padding: 0 $space-6;
+  }
+  
+  @include breakpoint(md) {
+    max-width: $container-md;
+  }
+  
+  @include breakpoint(lg) {
+    max-width: $container-lg;
+    padding: 0 $space-8;
+  }
+  
+  @include breakpoint(xl) {
+    max-width: $container-xl;
+  }
+  
+  @include breakpoint(xxl) {
+    max-width: $container-2xl;
+  }
+}
+
+// Container variants
+.container-sm {
+  @extend .container;
+  max-width: $container-sm;
+}
+
+.container-md {
+  @extend .container;
+  max-width: $container-md;
+}
+
+.container-lg {
+  @extend .container;
+  max-width: $container-lg;
+}
+
+.container-xl {
+  @extend .container;
+  max-width: $container-xl;
+}
+
+.container-2xl {
+  @extend .container;
+  max-width: $container-2xl;
+}
+
+// Fluid container
+.container-fluid {
+  width: 100%;
+  padding: 0 $space-4;
+  
+  @include breakpoint(sm) {
+    padding: 0 $space-6;
+  }
+  
+  @include breakpoint(lg) {
+    padding: 0 $space-8;
+  }
+}
+
+// Section containers
+.section {
+  padding: $space-16 0;
+  
+  @include breakpoint(md) {
+    padding: $space-12 0;
+  }
+}
+
+.section-sm {
+  padding: $space-8 0;
+  
+  @include breakpoint(md) {
+    padding: $space-6 0;
+  }
+}
+
+.section-lg {
+  padding: $space-24 0;
+  
+  @include breakpoint(md) {
+    padding: $space-16 0;
+  }
+}

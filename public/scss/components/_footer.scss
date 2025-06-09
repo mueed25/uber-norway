@@ -1,0 +1,61 @@
+// Footer Component Styles
+
+.app-footer {
+  background-color: $primary-black;
+  color: $primary-white;
+  padding: 3rem 0 1.5rem;
+  margin-top: auto;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.footer-section {
+  h3 {
+    margin-bottom: $space-4;
+  }
+}
+
+.footer-title {
+  font-size: $font-base;
+  font-weight: $font-semibold;
+  color: $primary-white;
+  margin-bottom: $space-4;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  
+  li {
+    margin-bottom: $space-2;
+  }
+  
+  a {
+    color: $gray-400;
+    text-decoration: none;
+    font-size: $font-sm;
+    transition: color $transition-fast;
+    
+    &:hover {
+      color: $primary-white;
+    }
+  }
+}
+
+.footer-bottom {
+  padding-top: 2rem;
+  border-top: 1px solid $gray-700;
+  text-align: center;
+}
+
+.copyright {
+  font-size: $font-sm;
+  color: $gray-500;
+  margin: 0;
+}
