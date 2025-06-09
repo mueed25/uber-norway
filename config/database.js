@@ -2,12 +2,9 @@ const mongoose = require('mongoose');
 
 const connectDatabase = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/uber-norway';
+    const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/uber-norway';
     
-    await mongoose.connect(mongoURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(mongoURI);
     
     console.log('🍃 MongoDB connected successfully');
   } catch (error) {

@@ -89,6 +89,6 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚗 Uber Clone MCP Server running on http://localhost:${PORT}`);
+  console.log(`🚗 Uber norway http://localhost:${PORT}`);
   console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
 });

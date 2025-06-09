@@ -1,448 +1,542 @@
-/**
- * Google Maps Integration for Uber Clone
- * Handles map initialization, autocomplete, and route display
- */
-
-class UberMap {
+// Google Maps integration for Uber Clone
+class MapHandler {
     constructor() {
         this.map = null;
         this.directionsService = null;
         this.directionsRenderer = null;
-        this.pickupAutocomplete = null;
-        this.destinationAutocomplete = null;
-        this.markers = {
-            pickup: null,
-            destination: null
-        };
+        this.pickupMarker = null;
+        this.destinationMarker = null;
+        this.userLocationMarker = null;
+        this.infoWindows = [];
         
-        // Default map center (Oslo, Norway based on screenshot)
+        // Default center (Oslo, Norway based on the image)
         this.defaultCenter = { lat: 59.9139, lng: 10.7522 };
-        this.currentRoute = null;
+        this.userLocation = null;
         
         this.init();
     }
-
-    /**
-     * Initialize the map and set up event listeners
-     */
+    
     init() {
-        this.initMap();
-        this.setupAutocomplete();
-        this.bindEvents();
+        // Wait for Google Maps API to load
+        if (typeof google === 'undefined' || !google.maps) {
+            console.warn('Google Maps API not loaded');
+            return;
+        }
+        
+        this.initializeMap();
+        this.setupEventListeners();
+        this.getCurrentLocation();
     }
-
-    /**
-     * Initialize Google Map
-     */
-    initMap() {
+    
+    initializeMap() {
         const mapElement = document.getElementById('map');
         if (!mapElement) {
             console.warn('Map element not found');
             return;
         }
-
-        // Map configuration
+        
+        // Map options
         const mapOptions = {
-            zoom: 10,
+            zoom: 12,
             center: this.defaultCenter,
-            styles: [
-                {
-                    featureType: 'poi',
-                    elementType: 'labels',
-                    stylers: [{ visibility: 'off' }]
-                },
-                {
-                    featureType: 'transit',
-                    elementType: 'labels',
-                    stylers: [{ visibility: 'off' }]
-                }
-            ],
+            styles: this.getMapStyles(),
+            zoomControl: true,
             mapTypeControl: false,
+            scaleControl: false,
             streetViewControl: false,
-            fullscreenControl: false,
-            zoomControlOptions: {
-                position: google.maps.ControlPosition.RIGHT_CENTER
-            }
+            rotateControl: false,
+            fullscreenControl: true,
+            gestureHandling: 'cooperative'
         };
-
+        
+        // Initialize map
         this.map = new google.maps.Map(mapElement, mapOptions);
         
         // Initialize directions service and renderer
         this.directionsService = new google.maps.DirectionsService();
         this.directionsRenderer = new google.maps.DirectionsRenderer({
-            suppressMarkers: true, // We'll add custom markers
+            suppressMarkers: true,
             polylineOptions: {
                 strokeColor: '#000000',
                 strokeWeight: 4,
                 strokeOpacity: 0.8
             }
         });
-        
         this.directionsRenderer.setMap(this.map);
+        
+        // Add traffic layer
+        const trafficLayer = new google.maps.TrafficLayer();
+        trafficLayer.setMap(this.map);
         
         console.log('Map initialized successfully');
     }
-
-    /**
-     * Setup Google Places Autocomplete for input fields
-     */
-    setupAutocomplete() {
+    
+    setupEventListeners() {
+        // Listen for map clicks
+        if (this.map) {
+            this.map.addListener('click', (e) => {
+                this.handleMapClick(e);
+            });
+            
+            // Listen for zoom changes
+            this.map.addListener('zoom_changed', () => {
+                this.adjustMarkersForZoom();
+            });
+        }
+        
+        // Listen for form changes to update map
         const pickupInput = document.getElementById('pickup');
         const destinationInput = document.getElementById('destination');
         
-        if (!pickupInput || !destinationInput) {
-            console.warn('Input elements not found');
-            return;
+        if (pickupInput) {
+            pickupInput.addEventListener('input', window.debounce(() => {
+                this.geocodeAndUpdatePickup(pickupInput.value);
+            }, 500));
         }
-
-        // Autocomplete options - restrict to Norway based on screenshot
-        const autocompleteOptions = {
-            componentRestrictions: { country: 'no' }, // Norway
-            fields: ['place_id', 'geometry', 'name', 'formatted_address'],
-            types: ['establishment', 'geocode']
-        };
-
-        // Initialize autocomplete for pickup
-        this.pickupAutocomplete = new google.maps.places.Autocomplete(
-            pickupInput, 
-            autocompleteOptions
-        );
-
-        // Initialize autocomplete for destination
-        this.destinationAutocomplete = new google.maps.places.Autocomplete(
-            destinationInput, 
-            autocompleteOptions
-        );
-
-        // Add event listeners for place selection
-        this.pickupAutocomplete.addListener('place_changed', () => {
-            this.handlePlaceSelection('pickup');
-        });
-
-        this.destinationAutocomplete.addListener('place_changed', () => {
-            this.handlePlaceSelection('destination');
-        });
-
-        console.log('Autocomplete initialized');
-    }
-
-    /**
-     * Handle place selection from autocomplete
-     * @param {string} type - 'pickup' or 'destination'
-     */
-    handlePlaceSelection(type) {
-        const autocomplete = type === 'pickup' ? this.pickupAutocomplete : this.destinationAutocomplete;
-        const place = autocomplete.getPlace();
-
-        if (!place.geometry || !place.geometry.location) {
-            console.warn(`No geometry found for ${type} location`);
-            return;
-        }
-
-        // Update marker
-        this.updateMarker(type, place.geometry.location, place.name || place.formatted_address);
         
-        // If both locations are set, calculate route
-        this.calculateRoute();
-        
-        console.log(`${type} location selected:`, place.name || place.formatted_address);
-    }
-
-    /**
-     * Update marker on map
-     * @param {string} type - 'pickup' or 'destination'
-     * @param {google.maps.LatLng} location - Marker location
-     * @param {string} title - Marker title
-     */
-    updateMarker(type, location, title) {
-        // Remove existing marker
-        if (this.markers[type]) {
-            this.markers[type].setMap(null);
+        if (destinationInput) {
+            destinationInput.addEventListener('input', window.debounce(() => {
+                this.geocodeAndUpdateDestination(destinationInput.value);
+            }, 500));
         }
-
-        // Create new marker with custom styling
-        const markerIcon = {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: type === 'pickup' ? '#000000' : '#000000',
-            fillOpacity: 1,
-            strokeColor: '#ffffff',
-            strokeWeight: 2,
-            scale: 8
+    }
+    
+    getCurrentLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    this.userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    // Center map on user location if in Norway area
+                    if (this.isInNorway(this.userLocation)) {
+                        this.map.setCenter(this.userLocation);
+                        this.addUserLocationMarker();
+                    }
+                },
+                (error) => {
+                    console.warn('Geolocation error:', error);
+                    // Use default location (Oslo)
+                    this.map.setCenter(this.defaultCenter);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 300000 // 5 minutes
+                }
+            );
+        } else {
+            console.warn('Geolocation not supported');
+            this.map.setCenter(this.defaultCenter);
+        }
+    }
+    
+    isInNorway(location) {
+        // Rough bounds for Norway
+        return location.lat >= 58 && location.lat <= 72 && 
+               location.lng >= 4 && location.lng <= 32;
+    }
+    
+    addUserLocationMarker() {
+        if (this.userLocationMarker) {
+            this.userLocationMarker.setMap(null);
+        }
+        
+        this.userLocationMarker = new google.maps.Marker({
+            position: this.userLocation,
+            map: this.map,
+            title: 'Your Location',
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: '#4285F4',
+                fillOpacity: 1,
+                strokeColor: '#ffffff',
+                strokeWeight: 2,
+                scale: 8
+            },
+            zIndex: 1000
+        });
+    }
+    
+    handleMapClick(event) {
+        const clickedLocation = {
+            lat: event.latLng.lat(),
+            lng: event.latLng.lng()
         };
-
-        this.markers[type] = new google.maps.Marker({
+        
+        // Reverse geocode to get address
+        this.reverseGeocode(clickedLocation).then(address => {
+            // Determine which input to fill based on current form state
+            const pickupInput = document.getElementById('pickup');
+            const destinationInput = document.getElementById('destination');
+            
+            if (!pickupInput.value) {
+                pickupInput.value = address;
+                pickupInput.dataset.lat = clickedLocation.lat;
+                pickupInput.dataset.lng = clickedLocation.lng;
+                this.updatePickupLocation(event.latLng);
+            } else if (!destinationInput.value) {
+                destinationInput.value = address;
+                destinationInput.dataset.lat = clickedLocation.lat;
+                destinationInput.dataset.lng = clickedLocation.lng;
+                this.updateDestinationLocation(event.latLng);
+            }
+            
+            // Trigger form validation
+            if (window.formHandler) {
+                window.formHandler.validateForm();
+            }
+        });
+    }
+    
+    reverseGeocode(location) {
+        return new Promise((resolve, reject) => {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ location: location }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    resolve(results[0].formatted_address);
+                } else {
+                    reject('Geocoder failed: ' + status);
+                }
+            });
+        });
+    }
+    
+    geocodeAndUpdatePickup(address) {
+        if (!address || address.length < 3) return;
+        
+        this.geocodeAddress(address).then(location => {
+            this.updatePickupLocation(location);
+        }).catch(error => {
+            console.warn('Geocoding failed for pickup:', error);
+        });
+    }
+    
+    geocodeAndUpdateDestination(address) {
+        if (!address || address.length < 3) return;
+        
+        this.geocodeAddress(address).then(location => {
+            this.updateDestinationLocation(location);
+        }).catch(error => {
+            console.warn('Geocoding failed for destination:', error);
+        });
+    }
+    
+    geocodeAddress(address) {
+        return new Promise((resolve, reject) => {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ 
+                address: address,
+                componentRestrictions: { country: 'NO' }
+            }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    resolve(results[0].geometry.location);
+                } else {
+                    reject('Geocoder failed: ' + status);
+                }
+            });
+        });
+    }
+    
+    updatePickupLocation(location) {
+        // Remove existing pickup marker
+        if (this.pickupMarker) {
+            this.pickupMarker.setMap(null);
+        }
+        
+        // Add new pickup marker
+        this.pickupMarker = new google.maps.Marker({
             position: location,
             map: this.map,
-            title: title,
-            icon: markerIcon,
-            zIndex: type === 'pickup' ? 1000 : 1001
+            title: 'Pickup Location',
+            icon: {
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="8" fill="#000000"/>
+                        <circle cx="12" cy="12" r="3" fill="#ffffff"/>
+                    </svg>
+                `),
+                scaledSize: new google.maps.Size(24, 24),
+                anchor: new google.maps.Point(12, 12)
+            },
+            zIndex: 100
         });
-
+        
         // Add info window
         const infoWindow = new google.maps.InfoWindow({
-            content: `<div style="font-weight: 500; color: #000;">${title}</div>`
+            content: '<div class="map-info-window"><strong>Pickup Location</strong></div>'
         });
-
-        this.markers[type].addListener('click', () => {
-            infoWindow.open(this.map, this.markers[type]);
+        
+        this.pickupMarker.addListener('click', () => {
+            this.closeAllInfoWindows();
+            infoWindow.open(this.map, this.pickupMarker);
+            this.infoWindows.push(infoWindow);
         });
+        
+        this.updateRoute();
     }
-
-    /**
-     * Calculate and display route between pickup and destination
-     */
-    calculateRoute() {
-        if (!this.markers.pickup || !this.markers.destination) {
-            return; // Need both markers to calculate route
+    
+    updateDestinationLocation(location) {
+        // Remove existing destination marker
+        if (this.destinationMarker) {
+            this.destinationMarker.setMap(null);
         }
-
+        
+        // Add new destination marker
+        this.destinationMarker = new google.maps.Marker({
+            position: location,
+            map: this.map,
+            title: 'Destination',
+            icon: {
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#000000"/>
+                    </svg>
+                `),
+                scaledSize: new google.maps.Size(24, 24),
+                anchor: new google.maps.Point(12, 24)
+            },
+            zIndex: 200
+        });
+        
+        // Add info window
+        const infoWindow = new google.maps.InfoWindow({
+            content: '<div class="map-info-window"><strong>Destination</strong></div>'
+        });
+        
+        this.destinationMarker.addListener('click', () => {
+            this.closeAllInfoWindows();
+            infoWindow.open(this.map, this.destinationMarker);
+            this.infoWindows.push(infoWindow);
+        });
+        
+        this.updateRoute();
+    }
+    
+    updateRoute() {
+        if (!this.pickupMarker || !this.destinationMarker) {
+            return;
+        }
+        
         const request = {
-            origin: this.markers.pickup.getPosition(),
-            destination: this.markers.destination.getPosition(),
+            origin: this.pickupMarker.getPosition(),
+            destination: this.destinationMarker.getPosition(),
             travelMode: google.maps.TravelMode.DRIVING,
             unitSystem: google.maps.UnitSystem.METRIC,
             avoidHighways: false,
             avoidTolls: false
         };
-
+        
         this.directionsService.route(request, (result, status) => {
             if (status === 'OK') {
                 this.directionsRenderer.setDirections(result);
-                this.currentRoute = result;
                 
-                // Update map bounds to show entire route
-                this.fitMapToRoute();
+                // Fit map to show entire route
+                const bounds = new google.maps.LatLngBounds();
+                bounds.extend(this.pickupMarker.getPosition());
+                bounds.extend(this.destinationMarker.getPosition());
+                this.map.fitBounds(bounds);
                 
-                // Dispatch custom event with route data
-                this.dispatchRouteEvent(result);
+                // Add some padding
+                setTimeout(() => {
+                    this.map.panBy(0, -50);
+                }, 100);
                 
-                console.log('Route calculated successfully');
+                // Update trip information
+                this.updateTripInfo(result.routes[0]);
             } else {
                 console.error('Directions request failed:', status);
-                this.showError('Unable to calculate route. Please try different locations.');
             }
         });
     }
-
-    /**
-     * Fit map to show entire route
-     */
-    fitMapToRoute() {
-        if (!this.currentRoute) return;
-
-        const bounds = new google.maps.LatLngBounds();
-        
-        // Add pickup and destination to bounds
-        if (this.markers.pickup) {
-            bounds.extend(this.markers.pickup.getPosition());
-        }
-        if (this.markers.destination) {
-            bounds.extend(this.markers.destination.getPosition());
-        }
-
-        // Fit map to bounds with padding
-        this.map.fitBounds(bounds, {
-            top: 50,
-            right: 50,
-            bottom: 50,
-            left: 50
-        });
-    }
-
-    /**
-     * Dispatch route calculation event
-     * @param {google.maps.DirectionsResult} result - Route result
-     */
-    dispatchRouteEvent(result) {
-        const route = result.routes[0];
+    
+    updateTripInfo(route) {
         const leg = route.legs[0];
+        const distance = leg.distance.value / 1000; // Convert to km
+        const duration = Math.round(leg.duration.value / 60); // Convert to minutes
         
-        const routeData = {
-            distance: leg.distance.text,
-            duration: leg.duration.text,
-            distanceValue: leg.distance.value, // in meters
-            durationValue: leg.duration.value, // in seconds
-            startAddress: leg.start_address,
-            endAddress: leg.end_address
-        };
-
-        // Dispatch custom event
-        const event = new CustomEvent('routeCalculated', {
-            detail: routeData
-        });
+        // Update UI if trip estimate is shown
+        const estimateDistance = document.querySelector('.estimate-item .estimate-value');
+        const estimateDuration = document.querySelector('.estimate-item:nth-child(2) .estimate-value');
         
-        document.dispatchEvent(event);
-    }
-
-    /**
-     * Clear all markers and route
-     */
-    clearMap() {
-        // Clear markers
-        Object.keys(this.markers).forEach(key => {
-            if (this.markers[key]) {
-                this.markers[key].setMap(null);
-                this.markers[key] = null;
-            }
-        });
-
-        // Clear directions
-        this.directionsRenderer.setDirections({routes: []});
-        this.currentRoute = null;
-
-        // Reset map view
-        this.map.setCenter(this.defaultCenter);
-        this.map.setZoom(10);
-        
-        console.log('Map cleared');
-    }
-
-    /**
-     * Set pickup location programmatically
-     * @param {string} address - Address string
-     */
-    setPickupLocation(address) {
-        this.geocodeAddress(address, 'pickup');
-    }
-
-    /**
-     * Set destination location programmatically
-     * @param {string} address - Address string
-     */
-    setDestinationLocation(address) {
-        this.geocodeAddress(address, 'destination');
-    }
-
-    /**
-     * Geocode address and set marker
-     * @param {string} address - Address to geocode
-     * @param {string} type - 'pickup' or 'destination'
-     */
-    geocodeAddress(address, type) {
-        const geocoder = new google.maps.Geocoder();
-        
-        geocoder.geocode({
-            address: address,
-            componentRestrictions: { country: 'NO' }
-        }, (results, status) => {
-            if (status === 'OK' && results[0]) {
-                const location = results[0].geometry.location;
-                this.updateMarker(type, location, results[0].formatted_address);
-                this.calculateRoute();
-            } else {
-                console.warn(`Geocoding failed for ${address}:`, status);
-            }
-        });
-    }
-
-    /**
-     * Show error message
-     * @param {string} message - Error message
-     */
-    showError(message) {
-        // This would typically integrate with a notification system
-        console.error(message);
-        
-        // For now, show simple alert
-        if (window.showNotification) {
-            window.showNotification(message, 'error');
+        if (estimateDistance) {
+            estimateDistance.textContent = `${distance.toFixed(1)} km`;
         }
-    }
-
-    /**
-     * Bind additional event listeners
-     */
-    bindEvents() {
-        // Listen for form submissions to clear any previous routes
+        if (estimateDuration) {
+            estimateDuration.textContent = `~${duration} min`;
+        }
+        
+        // Store data for form submission
         const form = document.getElementById('tripForm');
         if (form) {
-            form.addEventListener('submit', (e) => {
-                // Don't prevent default, just log
-                console.log('Form submitted');
-            });
+            // Update hidden fields or data attributes
+            form.dataset.distance = distance;
+            form.dataset.duration = duration;
         }
-
-        // Listen for window resize to resize map
-        window.addEventListener('resize', () => {
-            if (this.map) {
-                google.maps.event.trigger(this.map, 'resize');
+    }
+    
+    closeAllInfoWindows() {
+        this.infoWindows.forEach(infoWindow => {
+            infoWindow.close();
+        });
+        this.infoWindows = [];
+    }
+    
+    adjustMarkersForZoom() {
+        const zoom = this.map.getZoom();
+        const scale = Math.min(Math.max(zoom / 12, 0.8), 2);
+        
+        // Adjust marker sizes based on zoom
+        if (this.pickupMarker) {
+            const icon = this.pickupMarker.getIcon();
+            icon.scaledSize = new google.maps.Size(24 * scale, 24 * scale);
+            this.pickupMarker.setIcon(icon);
+        }
+        
+        if (this.destinationMarker) {
+            const icon = this.destinationMarker.getIcon();
+            icon.scaledSize = new google.maps.Size(24 * scale, 24 * scale);
+            this.destinationMarker.setIcon(icon);
+        }
+    }
+    
+    clearRoute() {
+        this.directionsRenderer.setDirections({routes: []});
+        
+        if (this.pickupMarker) {
+            this.pickupMarker.setMap(null);
+            this.pickupMarker = null;
+        }
+        
+        if (this.destinationMarker) {
+            this.destinationMarker.setMap(null);
+            this.destinationMarker = null;
+        }
+        
+        this.closeAllInfoWindows();
+    }
+    
+    resetMap() {
+        this.clearRoute();
+        this.map.setCenter(this.userLocation || this.defaultCenter);
+        this.map.setZoom(12);
+    }
+    
+    getMapStyles() {
+        // Custom map styling for Uber-like appearance
+        return [
+            {
+                "featureType": "administrative",
+                "elementType": "geometry",
+                "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "poi",
+                "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "road",
+                "elementType": "labels.icon",
+                "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "transit",
+                "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "water",
+                "elementType": "geometry.fill",
+                "stylers": [{"color": "#a2daf2"}]
+            },
+            {
+                "featureType": "landscape",
+                "elementType": "geometry.fill",
+                "stylers": [{"color": "#f5f5f5"}]
+            },
+            {
+                "featureType": "road.highway",
+                "elementType": "geometry.fill",
+                "stylers": [{"color": "#ffffff"}]
+            },
+            {
+                "featureType": "road.highway",
+                "elementType": "geometry.stroke",
+                "stylers": [{"color": "#e0e0e0"}]
+            },
+            {
+                "featureType": "road.arterial",
+                "elementType": "geometry.fill",
+                "stylers": [{"color": "#ffffff"}]
+            },
+            {
+                "featureType": "road.arterial",
+                "elementType": "geometry.stroke",
+                "stylers": [{"color": "#e0e0e0"}]
+            },
+            {
+                "featureType": "road.local",
+                "elementType": "geometry.fill",
+                "stylers": [{"color": "#ffffff"}]
             }
+        ];
+    }
+    
+    // Public methods for external use
+    showRoute(pickup, destination) {
+        this.geocodeAddress(pickup).then(pickupLocation => {
+            this.updatePickupLocation(pickupLocation);
+            
+            return this.geocodeAddress(destination);
+        }).then(destinationLocation => {
+            this.updateDestinationLocation(destinationLocation);
+        }).catch(error => {
+            console.error('Error showing route:', error);
         });
     }
-
-    /**
-     * Get current route data
-     * @returns {Object|null} Route data or null
-     */
-    getCurrentRoute() {
-        return this.currentRoute;
-    }
-
-    /**
-     * Check if both locations are set
-     * @returns {boolean} True if both pickup and destination are set
-     */
-    hasBothLocations() {
-        return this.markers.pickup !== null && this.markers.destination !== null;
+    
+    getMapInstance() {
+        return this.map;
     }
 }
 
-// Global map instance
-let uberMap = null;
-
-/**
- * Initialize map when Google Maps API is loaded
- * This function is called by the Google Maps API
- */
+// Global map initialization function (called by Google Maps API)
 function initMap() {
-    try {
-        uberMap = new UberMap();
-        
-        // Make map instance globally available
-        window.uberMap = uberMap;
-        
-        console.log('Uber Map initialized successfully');
-    } catch (error) {
-        console.error('Failed to initialize map:', error);
-    }
+    console.log('Initializing Google Maps...');
+    window.mapHandler = new MapHandler();
 }
 
-/**
- * Handle case where Google Maps fails to load
- */
-window.addEventListener('load', () => {
-    // Check if Google Maps loaded
-    setTimeout(() => {
-        if (typeof google === 'undefined') {
-            console.error('Google Maps failed to load');
+// Initialize map when DOM is ready and Google Maps is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // If Google Maps is already loaded, initialize immediately
+    if (typeof google !== 'undefined' && google.maps) {
+        initMap();
+    }
+    
+    // Set up error handling for map loading
+    window.addEventListener('error', (e) => {
+        if (e.message && e.message.includes('Google Maps')) {
+            console.error('Google Maps failed to load:', e);
             
             // Show fallback message
             const mapElement = document.getElementById('map');
             if (mapElement) {
                 mapElement.innerHTML = `
-                    <div style="
-                        display: flex; 
-                        align-items: center; 
-                        justify-content: center; 
-                        height: 100%; 
-                        background-color: #f6f6f6;
-                        color: #666;
-                        font-size: 14px;
-                        text-align: center;
-                        padding: 20px;
-                    ">
-                        <div>
-                            <div style="margin-bottom: 8px;">Map temporarily unavailable</div>
-                            <div style="font-size: 12px;">Please check your internet connection</div>
+                    <div class="map-error">
+                        <div class="map-error-content">
+                            <h3>Map Unavailable</h3>
+                            <p>Unable to load Google Maps. Please check your internet connection and try again.</p>
+                            <button onclick="location.reload()" class="btn btn-primary">Retry</button>
                         </div>
                     </div>
                 `;
             }
         }
-    }, 5000);
+    });
 });
 
-// Export for module systems
+// Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { UberMap, initMap };
+    module.exports = MapHandler;
 }

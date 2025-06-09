@@ -28,3 +28,297 @@
 
 // 6. Utilities
 @import 'utils/utilities';
+
+// Home Page Styles
+
+.home-container {
+  min-height: calc(100vh - #{$header-height});
+  background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+  
+  @media (max-width: map-get($breakpoints, md)) {
+    min-height: calc(100vh - #{$header-height-mobile});
+  }
+}
+
+// Hero Section
+.hero-section {
+  padding: $space-16 0 $space-8 0;
+  text-align: center;
+  
+  @media (max-width: map-get($breakpoints, md)) {
+    padding: $space-12 0 $space-6 0;
+  }
+}
+
+.hero-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: $font-bold;
+  color: $primary-black;
+  margin-bottom: $space-4;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  
+  @media (max-width: map-get($breakpoints, lg)) {
+    font-size: 3rem;
+  }
+  
+  @media (max-width: map-get($breakpoints, md)) {
+    font-size: 2.5rem;
+  }
+  
+  @media (max-width: map-get($breakpoints, sm)) {
+    font-size: 2rem;
+  }
+}
+
+.hero-subtitle {
+  font-size: $font-xl;
+  color: $text-secondary;
+  font-weight: $font-normal;
+  margin-bottom: 0;
+  
+  @media (max-width: map-get($breakpoints, md)) {
+    font-size: $font-lg;
+  }
+}
+
+// Main Booking Section
+.booking-section {
+  padding: 0 0 $space-16 0;
+  
+  @media (max-width: map-get($breakpoints, md)) {
+    padding: 0 0 $space-12 0;
+  }
+}
+
+.booking-layout {
+  display: grid;
+  grid-template-columns: 480px 1fr;
+  gap: $space-8;
+  align-items: start;
+  min-height: 600px;
+  
+  @media (max-width: map-get($breakpoints, xl)) {
+    grid-template-columns: 420px 1fr;
+    gap: $space-6;
+  }
+  
+  @media (max-width: map-get($breakpoints, lg)) {
+    grid-template-columns: 1fr;
+    gap: $space-6;
+  }
+}
+
+// Booking Panel
+.booking-panel {
+  background-color: $primary-white;
+  border-radius: $border-radius-xl;
+  box-shadow: $shadow-xl;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: calc(#{$header-height} + #{$space-4});
+  
+  @media (max-width: map-get($breakpoints, lg)) {
+    position: static;
+    order: 2;
+  }
+  
+  @media (max-width: map-get($breakpoints, md)) {
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-lg;
+  }
+}
+
+.booking-form-container {
+  padding: $space-8;
+  
+  @media (max-width: map-get($breakpoints, md)) {
+    padding: $space-6;
+  }
+}
+
+// Booking Form
+.booking-form {
+  .form-group:first-child {
+    margin-bottom: $space-8;
+  }
+  
+  .form-group:nth-child(2) {
+    margin-bottom: $space-6;
+    position: relative;
+    
+    // Add connecting line between pickup and destination
+    &::after {
+      content: '';
+      position: absolute;
+      left: 21px;
+      top: -20px;
+      width: 2px;
+      height: 20px;
+      background: linear-gradient(to bottom, $gray-300 0%, $gray-300 100%);
+    }
+  }
+}
+
+// Map Panel
+.map-panel {
+  position: relative;
+  min-height: 600px;
+  
+  @media (max-width: map-get($breakpoints, lg)) {
+    order: 1;
+    min-height: 400px;
+  }
+}
+
+// Trip Estimate Section
+.trip-estimate {
+  margin-top: $space-8;
+  padding: $space-6;
+  background-color: $gray-50;
+  border-radius: $border-radius-lg;
+  border: 1px solid $border-light;
+}
+
+.estimate-header {
+  margin-bottom: $space-4;
+  
+  h3 {
+    font-size: $font-xl;
+    font-weight: $font-semibold;
+    color: $primary-black;
+    margin-bottom: 0;
+  }
+}
+
+.estimate-details {
+  margin-bottom: $space-6;
+}
+
+.estimate-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $space-3 0;
+  border-bottom: 1px solid $border-light;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &.estimate-price {
+    padding-top: $space-4;
+    margin-top: $space-2;
+    border-top: 2px solid $border-medium;
+    border-bottom: none;
+  }
+}
+
+.estimate-label {
+  font-size: $font-base;
+  color: $text-secondary;
+  font-weight: $font-medium;
+}
+
+.estimate-value {
+  font-size: $font-base;
+  color: $primary-black;
+  font-weight: $font-semibold;
+  
+  &.price {
+    font-size: $font-xl;
+    color: $primary-black;
+    font-weight: $font-bold;
+  }
+}
+
+// Alert Styles
+.alert {
+  padding: $space-4;
+  border-radius: $border-radius;
+  margin-bottom: $space-6;
+  border: 1px solid transparent;
+  
+  p {
+    margin: 0;
+    font-size: $font-sm;
+    font-weight: $font-medium;
+  }
+  
+  &.alert-error {
+    background-color: rgba($error, 0.1);
+    border-color: rgba($error, 0.2);
+    color: darken($error, 20%);
+  }
+  
+  &.alert-success {
+    background-color: rgba($success, 0.1);
+    border-color: rgba($success, 0.2);
+    color: darken($success, 20%);
+  }
+  
+  &.alert-warning {
+    background-color: rgba($warning, 0.1);
+    border-color: rgba($warning, 0.2);
+    color: darken($warning, 30%);
+  }
+  
+  &.alert-info {
+    background-color: rgba($info, 0.1);
+    border-color: rgba($info, 0.2);
+    color: darken($info, 20%);
+  }
+}
+
+// Loading states
+.booking-form {
+  &.loading {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.trip-estimate {
+  animation: fadeIn 0.5s ease-out;
+}
+
+// Responsive adjustments
+@media (max-width: map-get($breakpoints, sm)) {
+  .hero-title {
+    font-size: 1.75rem;
+  }
+  
+  .hero-subtitle {
+    font-size: $font-base;
+  }
+  
+  .booking-form-container {
+    padding: $space-4;
+  }
+  
+  .trip-estimate {
+    padding: $space-4;
+    margin-top: $space-6;
+  }
+  
+  .estimate-item {
+    padding: $space-2 0;
+  }
+}
