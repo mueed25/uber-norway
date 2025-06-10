@@ -19,7 +19,9 @@ class MapHandler {
     init() {
         // Wait for Google Maps API to load
         if (typeof google === 'undefined' || !google.maps) {
-            console.warn('Google Maps API not loaded');
+            console.warn('Google Maps API not loaded, waiting...');
+            // Retry after a short delay
+            setTimeout(() => this.init(), 500);
             return;
         }
         
@@ -88,16 +90,24 @@ class MapHandler {
         const pickupInput = document.getElementById('pickup');
         const destinationInput = document.getElementById('destination');
         
-        if (pickupInput) {
+        if (pickupInput && window.debounce) {
             pickupInput.addEventListener('input', window.debounce(() => {
                 this.geocodeAndUpdatePickup(pickupInput.value);
             }, 500));
+        } else if (pickupInput) {
+            pickupInput.addEventListener('input', () => {
+                setTimeout(() => this.geocodeAndUpdatePickup(pickupInput.value), 500);
+            });
         }
         
-        if (destinationInput) {
+        if (destinationInput && window.debounce) {
             destinationInput.addEventListener('input', window.debounce(() => {
                 this.geocodeAndUpdateDestination(destinationInput.value);
             }, 500));
+        } else if (destinationInput) {
+            destinationInput.addEventListener('input', () => {
+                setTimeout(() => this.geocodeAndUpdateDestination(destinationInput.value), 500);
+            });
         }
     }
     
@@ -172,12 +182,12 @@ class MapHandler {
             const pickupInput = document.getElementById('pickup');
             const destinationInput = document.getElementById('destination');
             
-            if (!pickupInput.value) {
+            if (pickupInput && !pickupInput.value) {
                 pickupInput.value = address;
                 pickupInput.dataset.lat = clickedLocation.lat;
                 pickupInput.dataset.lng = clickedLocation.lng;
                 this.updatePickupLocation(event.latLng);
-            } else if (!destinationInput.value) {
+            } else if (destinationInput && !destinationInput.value) {
                 destinationInput.value = address;
                 destinationInput.dataset.lat = clickedLocation.lat;
                 destinationInput.dataset.lng = clickedLocation.lng;
@@ -509,9 +519,14 @@ function initMap() {
 
 // Initialize map when DOM is ready and Google Maps is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM ready, checking for Google Maps...');
+    
     // If Google Maps is already loaded, initialize immediately
     if (typeof google !== 'undefined' && google.maps) {
+        console.log('Google Maps already loaded, initializing...');
         initMap();
+    } else {
+        console.log('Waiting for Google Maps to load...');
     }
     
     // Set up error handling for map loading
@@ -523,11 +538,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const mapElement = document.getElementById('map');
             if (mapElement) {
                 mapElement.innerHTML = `
-                    <div class="map-error">
-                        <div class="map-error-content">
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f5f5f5; color: #666; text-align: center; padding: 20px;">
+                        <div>
                             <h3>Map Unavailable</h3>
                             <p>Unable to load Google Maps. Please check your internet connection and try again.</p>
-                            <button onclick="location.reload()" class="btn btn-primary">Retry</button>
+                            <button onclick="location.reload()" style="padding: 10px 20px; background: #000; color: white; border: none; border-radius: 4px; cursor: pointer;">Retry</button>
                         </div>
                     </div>
                 `;

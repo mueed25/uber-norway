@@ -32,21 +32,19 @@
     <!-- Footer -->
     {{> footer}}
     
-    <!-- Google Maps API -->
-    {{#if mapConfig}}
+    <!-- Google Maps API with direct API key -->
     <script>
-        window.mapConfig = {{{json mapConfig}}};
-        window.googleMapsApiKey = '{{apiKey}}';
+        // Initialize map config
+        window.mapConfig = {
+            center: { lat: 59.9139, lng: 10.7522 },
+            zoom: 12
+        };
+        window.googleMapsApiKey = 'AIzaSyBqAPpcMUtEgMOcrdGkezVQL5XEKzDalFA';
     </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{apiKey}}&libraries=places&callback=initMap"></script>
-    {{/if}}
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBqAPpcMUtEgMOcrdGkezVQL5XEKzDalFA&libraries=places&callback=initMap"></script>
     
     <!-- Main JavaScript -->
     <script src="/js/main.js"></script>
-    
-    {{#if page}}
-    <!-- Page-specific JavaScript -->
-    <script src="/js/{{page}}.js"></script>
-    {{/if}}
+    <script src="/js/map.js"></script>
 </body>
 </html>
