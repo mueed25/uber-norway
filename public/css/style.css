@@ -67,6 +67,9 @@ h1, h2, h3, h4, h5, h6, p, blockquote, pre, dl, dd, ol, ul, figure, hr, fieldset
   top: 0;
   z-index: 1020;
   height: 72px;
+  display: flex;
+  width: 100%;
+  align-items: center;
 }
 
 @media (max-width: 768px) {
@@ -80,6 +83,7 @@ h1, h2, h3, h4, h5, h6, p, blockquote, pre, dl, dd, ol, ul, figure, hr, fieldset
   align-items: center;
   justify-content: space-between;
   height: 100%;
+  width: 100%;
 }
 
 .logo-link {
@@ -88,7 +92,7 @@ h1, h2, h3, h4, h5, h6, p, blockquote, pre, dl, dd, ol, ul, figure, hr, fieldset
 }
 
 .logo-text {
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #000000;
 }
@@ -186,7 +190,7 @@ h1, h2, h3, h4, h5, h6, p, blockquote, pre, dl, dd, ol, ul, figure, hr, fieldset
 }
 
 .btn-sm {
-  padding: 0.5rem 1rem;
+  padding: 1rem 2rem;
   font-size: 0.875rem;
   min-height: 36px;
 }
@@ -214,14 +218,13 @@ h1, h2, h3, h4, h5, h6, p, blockquote, pre, dl, dd, ol, ul, figure, hr, fieldset
 
 /* Home Page Styles */
 .home-container {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  padding-top: 10px;
 }
 
 .hero-section {
   background-color: #ffffff;
-  padding: 2rem 0 1rem;
 }
 
 @media (max-width: 768px) {
@@ -238,7 +241,7 @@ h1, h2, h3, h4, h5, h6, p, blockquote, pre, dl, dd, ol, ul, figure, hr, fieldset
   font-size: 2.25rem;
   font-weight: 600;
   color: #000000;
-  margin-bottom: 0.5rem;
+  margin-bottom: 3rem;
   line-height: 1.25;
 }
 
@@ -252,6 +255,7 @@ h1, h2, h3, h4, h5, h6, p, blockquote, pre, dl, dd, ol, ul, figure, hr, fieldset
   font-size: 1rem;
   color: #616161;
   margin: 0;
+  margin-bottom: 1rem;
 }
 
 /* Booking Section */

@@ -68,51 +68,7 @@ class UberApp {
         this.setupAutoResizeTextareas();
     }
     
-    setupResponsiveNav() {
-        const header = document.querySelector('.app-header');
-        if (!header) return;
-        
-        // Create mobile menu toggle
-        const mobileToggle = document.createElement('button');
-        mobileToggle.className = 'mobile-nav-toggle';
-        mobileToggle.innerHTML = `
-            <span class="hamburger-line"></span>
-            <span class="hamburger-line"></span>
-            <span class="hamburger-line"></span>
-        `;
-        mobileToggle.setAttribute('aria-label', 'Toggle navigation');
-        
-        const headerContent = header.querySelector('.header-content');
-        headerContent.appendChild(mobileToggle);
-        
-        // Toggle mobile menu
-        mobileToggle.addEventListener('click', () => {
-            header.classList.toggle('nav-open');
-            document.body.classList.toggle('nav-open');
-            
-            // Update aria-expanded
-            const isOpen = header.classList.contains('nav-open');
-            mobileToggle.setAttribute('aria-expanded', isOpen);
-        });
-        
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!header.contains(e.target) && header.classList.contains('nav-open')) {
-                header.classList.remove('nav-open');
-                document.body.classList.remove('nav-open');
-                mobileToggle.setAttribute('aria-expanded', 'false');
-            }
-        });
-        
-        // Close mobile menu on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && header.classList.contains('nav-open')) {
-                header.classList.remove('nav-open');
-                document.body.classList.remove('nav-open');
-                mobileToggle.setAttribute('aria-expanded', 'false');
-            }
-        });
-    }
+    
     
     setupMobileNavigation() {
         // Handle mobile-specific interactions

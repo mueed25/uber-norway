@@ -1,13 +1,6 @@
 <div class="home-container">
     <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="hero-content">
-                <h1 class="hero-title">Go anywhere with Uber</h1>
-                <p class="hero-subtitle">Request a ride, hop in, and go.</p>
-            </div>
-        </div>
-    </section>
+   
 
     <!-- Main Booking Interface -->
     <section class="booking-section">
@@ -15,7 +8,15 @@
             <div class="booking-layout">
                 <!-- Left Panel - Booking Form -->
                 <div class="booking-panel">
+                     <section class="hero-section">
+                        <div class="container">
+                            <div class="hero-content">
+                                <h1 class="hero-title">Go anywhere with Uber</h1>
+                            </div>
+                        </div>
+                    </section>
                     <div class="booking-form-container">
+                        
                         {{#if error}}
                         <div class="alert alert-error">
                             <p>{{error.message}}</p>
