@@ -7,24 +7,18 @@ const helmet = require('helmet');
 const compression = require('compression');
 require('dotenv').config();
 
-// Import database configuration
-const connectDatabase = require('./config/database');
 
-// Import routes
+const connectDatabase = require('./config/database');
 const homeRoutes = require('./routes/home');
 const tripRoutes = require('./routes/trip');
-
-// Import utilities
 const helpers = require('./utils/helpers');
-
-// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Connect to MongoDB
 connectDatabase();
 
-// Security and performance middleware
+
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -40,14 +34,14 @@ app.use(helmet({
 app.use(compression());
 app.use(cors());
 
-// Body parsing middleware
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Static files middleware
+
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Handlebars engine configuration
+
 app.engine('hbs', engine({
   extname: '.hbs',
   defaultLayout: 'main',
@@ -87,7 +81,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
+
 app.listen(PORT, () => {
   console.log(`🚗 Uber norway http://localhost:${PORT}`);
   console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
