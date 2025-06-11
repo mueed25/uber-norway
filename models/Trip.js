@@ -69,7 +69,7 @@ const TripSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: false // Optional for now, can be made required when auth is implemented
+    required: false 
   }
 }, {
   timestamps: true
