@@ -31,35 +31,59 @@ class HomeController {
    * @param {Object} req - Express request object
    * @param {Object} res - Express response object
    */
-  async estimateTrip(req, res) {
+
+async estimateTrip(req, res) {
     try {
-      const { pickup, destination, date, time } = req.body;
+        console.log('Received request body:', req.body);
+        
+        const { pickup, destination, date, time } = req.body;
 
-      // Validate required fields
-      if (!pickup || !destination || !date || !time) {
-        throw new Error('All fields are required: pickup, destination, date, and time');
-      }
+        // Validate required fields
+        const errors = [];
+        if (!pickup || pickup.trim() === '') errors.push('pickup');
+        if (!destination || destination.trim() === '') errors.push('destination');
+        if (!date || date.trim() === '') errors.push('date');
+        if (!time || time.trim() === '') errors.push('time');
 
-      // For demo purposes, we'll use mock coordinates
-      // In a real app, you'd geocode the addresses using Google Places API
-      const tripData = await this.prepareTripData({
-        pickup,
-        destination,
-        date,
-        time
-      });
+        if (errors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Missing or empty fields: ${errors.join(', ')}`
+            });
+        }
 
-      // Present the trip estimate
-      const context = this.presenter.presentTripEstimate(tripData);
-      res.render('home', context);
+        // Validate pickup and destination are different
+        if (pickup.trim().toLowerCase() === destination.trim().toLowerCase()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Pickup and destination cannot be the same location'
+            });
+        }
+
+        const tripData = await this.prepareTripData({
+            pickup: pickup.trim(),
+            destination: destination.trim(),
+            date: date.trim(),
+            time: time.trim()
+        });
+
+        // Present the trip estimate
+        const context = this.presenter.presentTripEstimate(tripData);
+        
+        res.json({
+            success: true,
+            data: context,
+            message: 'Trip estimate calculated successfully'
+        });
 
     } catch (error) {
-      console.error('Trip Estimation Error:', error);
-      const errorContext = this.presenter.presentError(error, req.body);
-      res.status(400).render('home', errorContext);
+        console.error('Trip Estimation Error:', error);
+        res.status(400).json({
+            success: false,
+            message: error.message || 'Failed to calculate trip estimate'
+        });
     }
-  }
-
+}
   /**
    * Handle AJAX trip estimation for real-time updates
    * @param {Object} req - Express request object

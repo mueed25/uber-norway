@@ -9,6 +9,10 @@ class FormHandler {
         this.submitBtn = document.getElementById('seePricesBtn');
         this.bookTripBtn = document.getElementById('bookTripBtn');
         
+        // Autocomplete instances
+        this.pickupAutocomplete = null;
+        this.destinationAutocomplete = null;
+        
         this.init();
     }
     
@@ -63,8 +67,19 @@ class FormHandler {
             clearBtn.innerHTML = '×';
             clearBtn.addEventListener('click', () => {
                 input.value = '';
+                input.dataset.lat = '';
+                input.dataset.lng = '';
                 input.focus();
                 this.validateForm();
+                
+                // Clear corresponding marker from map
+                if (window.mapHandler) {
+                    if (input === this.pickupInput) {
+                        window.mapHandler.clearPickupMarker();
+                    } else if (input === this.destinationInput) {
+                        window.mapHandler.clearDestinationMarker();
+                    }
+                }
             });
             
             const wrapper = input.parentNode;
@@ -79,44 +94,119 @@ class FormHandler {
     }
     
     setupLocationAutocomplete() {
-        if (typeof google !== 'undefined' && google.maps) {
-            // Setup Google Places Autocomplete for location inputs
-            const options = {
-                types: ['geocode'],
-                componentRestrictions: { country: 'no' } // Restrict to Norway based on the image
-            };
+        // Wait for Google Maps to be available
+        if (typeof google === 'undefined' || !google.maps) {
+            console.warn('Google Maps API not loaded, retrying in 1 second...');
+            setTimeout(() => this.setupLocationAutocomplete(), 1000);
+            return;
+        }
+        
+        // Setup Google Places Autocomplete for location inputs
+        const options = {
+            types: ['geocode'],
+            componentRestrictions: { country: 'no' }, // Restrict to Norway
+            fields: ['formatted_address', 'geometry', 'name']
+        };
+        
+        try {
+            this.pickupAutocomplete = new google.maps.places.Autocomplete(this.pickupInput, options);
+            this.destinationAutocomplete = new google.maps.places.Autocomplete(this.destinationInput, options);
             
-            const pickupAutocomplete = new google.maps.places.Autocomplete(this.pickupInput, options);
-            const destinationAutocomplete = new google.maps.places.Autocomplete(this.destinationInput, options);
-            
-            pickupAutocomplete.addListener('place_changed', () => {
-                const place = pickupAutocomplete.getPlace();
-                if (place.geometry) {
+            // Pickup autocomplete listener
+            this.pickupAutocomplete.addListener('place_changed', () => {
+                const place = this.pickupAutocomplete.getPlace();
+                console.log('Pickup place selected:', place);
+                
+                if (place.geometry && place.geometry.location) {
+                    // Store coordinates
                     this.pickupInput.dataset.lat = place.geometry.location.lat();
                     this.pickupInput.dataset.lng = place.geometry.location.lng();
+                    
+                    // Update form validation
                     this.validateForm();
                     
-                    // Update map if available
+                    // Update map
                     if (window.mapHandler) {
                         window.mapHandler.updatePickupLocation(place.geometry.location);
                     }
+                    
+                    console.log('Pickup coordinates:', {
+                        lat: place.geometry.location.lat(),
+                        lng: place.geometry.location.lng()
+                    });
+                } else {
+                    console.warn('No geometry found for pickup place');
                 }
             });
             
-            destinationAutocomplete.addListener('place_changed', () => {
-                const place = destinationAutocomplete.getPlace();
-                if (place.geometry) {
+            // Destination autocomplete listener
+            this.destinationAutocomplete.addListener('place_changed', () => {
+                const place = this.destinationAutocomplete.getPlace();
+                console.log('Destination place selected:', place);
+                
+                if (place.geometry && place.geometry.location) {
+                    // Store coordinates
                     this.destinationInput.dataset.lat = place.geometry.location.lat();
                     this.destinationInput.dataset.lng = place.geometry.location.lng();
+                    
+                    // Update form validation
                     this.validateForm();
                     
-                    // Update map if available
+                    // Update map
                     if (window.mapHandler) {
                         window.mapHandler.updateDestinationLocation(place.geometry.location);
                     }
+                    
+                    console.log('Destination coordinates:', {
+                        lat: place.geometry.location.lat(),
+                        lng: place.geometry.location.lng()
+                    });
+                } else {
+                    console.warn('No geometry found for destination place');
                 }
             });
+            
+            console.log('Autocomplete setup completed');
+            
+        } catch (error) {
+            console.error('Error setting up autocomplete:', error);
         }
+    }
+    
+    // Manual geocoding fallback for typed addresses
+    geocodeAddress(address, isPickup = true) {
+        if (!address || address.length < 3) return;
+        
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({
+            address: address,
+            componentRestrictions: { country: 'NO' }
+        }, (results, status) => {
+            if (status === 'OK' && results[0]) {
+                const location = results[0].geometry.location;
+                const input = isPickup ? this.pickupInput : this.destinationInput;
+                
+                // Store coordinates
+                input.dataset.lat = location.lat();
+                input.dataset.lng = location.lng();
+                
+                // Update map
+                if (window.mapHandler) {
+                    if (isPickup) {
+                        window.mapHandler.updatePickupLocation(location);
+                    } else {
+                        window.mapHandler.updateDestinationLocation(location);
+                    }
+                }
+                
+                console.log(`${isPickup ? 'Pickup' : 'Destination'} geocoded:`, {
+                    lat: location.lat(),
+                    lng: location.lng()
+                });
+            } else {
+                console.warn(`Geocoding failed for ${address}:`, status);
+            }
+        });
     }
     
     validateField(field) {
@@ -142,6 +232,16 @@ class FormHandler {
                 } else if (value.length < 3) {
                     isValid = false;
                     errorMessage = 'Please enter a valid location';
+                } else {
+                    // Trigger geocoding for manually typed addresses
+                    const hasCoordinates = field.dataset.lat && field.dataset.lng;
+                    if (!hasCoordinates) {
+                        // Debounce geocoding
+                        clearTimeout(field.geocodeTimeout);
+                        field.geocodeTimeout = setTimeout(() => {
+                            this.geocodeAddress(value, field.id === 'pickup');
+                        }, 1000);
+                    }
                 }
                 break;
                 
@@ -208,57 +308,71 @@ class FormHandler {
         
         return isValid;
     }
+
+handleFormSubmit(e) {
+    e.preventDefault();
     
-    handleFormSubmit(e) {
-        e.preventDefault();
-        
-        // Validate all fields
-        const fields = [this.pickupInput, this.destinationInput, this.dateInput, this.timeInput];
-        let allValid = true;
-        
-        fields.forEach(field => {
-            if (!this.validateField(field)) {
-                allValid = false;
-            }
-        });
-        
-        // Check if pickup and destination are the same
-        if (this.pickupInput.value.trim().toLowerCase() === this.destinationInput.value.trim().toLowerCase()) {
-            this.showError('Pickup and destination cannot be the same location');
+    // Validate all fields
+    const fields = [this.pickupInput, this.destinationInput, this.dateInput, this.timeInput];
+    let allValid = true;
+    
+    fields.forEach(field => {
+        if (!this.validateField(field)) {
             allValid = false;
         }
-        
-        if (!allValid) {
-            return;
-        }
-        
-        // Show loading state
-        this.setLoadingState(true);
-        
-        // Submit form
-        const formData = new FormData(this.form);
-        
-        fetch('/estimate', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Form will be reloaded with results
-                window.location.reload();
-            } else {
-                this.showError(data.message || 'Failed to get trip estimate');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            this.showError('Network error. Please try again.');
-        })
-        .finally(() => {
-            this.setLoadingState(false);
-        });
+    });
+    
+    // Check if pickup and destination are the same
+    if (this.pickupInput.value.trim().toLowerCase() === this.destinationInput.value.trim().toLowerCase()) {
+        this.showError('Pickup and destination cannot be the same location');
+        allValid = false;
     }
+    
+    if (!allValid) {
+        return;
+    }
+    
+    // Show loading state
+    this.setLoadingState(true);
+    
+    // Prepare data as JSON instead of FormData
+    const formData = {
+        pickup: this.pickupInput.value.trim(),
+        destination: this.destinationInput.value.trim(),
+        date: this.dateInput.value,
+        time: this.timeInput.value,
+        pickup_lat: this.pickupInput.dataset.lat || '',
+        pickup_lng: this.pickupInput.dataset.lng || '',
+        destination_lat: this.destinationInput.dataset.lat || '',
+        destination_lng: this.destinationInput.dataset.lng || ''
+    };
+    
+    console.log('Sending data:', formData);
+    
+    fetch('/estimate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Handle success response
+            window.location.reload();
+        } else {
+            this.showError(data.message || 'Failed to get trip estimate');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        this.showError('Network error. Please try again o.');
+    })
+    .finally(() => {
+        this.setLoadingState(false);
+    });
+}
     
     handleBookTrip(e) {
         e.preventDefault();
@@ -268,6 +382,10 @@ class FormHandler {
             this.setLoadingState(true, 'Booking...');
             
             const formData = new FormData(this.form);
+            formData.append('pickup_lat', this.pickupInput.dataset.lat || '');
+            formData.append('pickup_lng', this.pickupInput.dataset.lng || '');
+            formData.append('destination_lat', this.destinationInput.dataset.lat || '');
+            formData.append('destination_lng', this.destinationInput.dataset.lng || '');
             
             fetch('/book', {
                 method: 'POST',
@@ -350,11 +468,27 @@ class FormHandler {
             }
         }, 5000);
     }
+    
+    // Public methods for external use
+    setPickupLocation(lat, lng, address = '') {
+        this.pickupInput.value = address;
+        this.pickupInput.dataset.lat = lat;
+        this.pickupInput.dataset.lng = lng;
+        this.validateForm();
+    }
+    
+    setDestinationLocation(lat, lng, address = '') {
+        this.destinationInput.value = address;
+        this.destinationInput.dataset.lat = lat;
+        this.destinationInput.dataset.lng = lng;
+        this.validateForm();
+    }
 }
 
 // Initialize form handler when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('tripForm')) {
         window.formHandler = new FormHandler();
+        console.log('Form handler initialized');
     }
 });
