@@ -6,6 +6,42 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 require('dotenv').config();
+const { auth } = require('express-openid-connect');
+
+
+const config = {
+  authRequired: false,
+  auth0Logout: true,
+  secret: process.env.SECRET,
+  baseURL: process.env.BASE_URL ,
+  clientID: process.env.CLIENT_ID,
+  issuerBaseURL: process.env.ISSUER_BASE_URL,
+  clientSecret: process.env.CLIENT_SECRET,
+  authorizationParams: {
+    response_type: 'code',
+    scope: 'openid profile email'
+  },
+  routes: {
+    callback: '/callback'
+  },
+  afterCallback: async (req, res, session) => {
+    const auth0Id = session.user.sub;
+    let user = await User.findOne({ auth0Id });
+    if (!user) {
+      user = await User.create({
+        auth0Id,
+        fullName: session.user.name, // or prompt later
+        // age & phone you’ll collect on /complete-profile
+      });
+    }
+    // 4. Stick your Mongo _id back on the session so you can reference it later
+    session.user.appUserId = user._id;
+    return session;
+  }
+
+};
+
+
 
 // Import database configuration
 const connectDatabase = require('./config/database');
@@ -25,6 +61,10 @@ const PORT = process.env.PORT || 3000;
 connectDatabase();
 
 // Security and performance middleware
+// app.get('/', (req, res) => {
+//   res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
+// });
+app.use(auth(config));
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {

@@ -18,7 +18,25 @@ class HomeController {
   async index(req, res) {
     try {
       const context = this.presenter.presentHomePage();
-      res.render('home', context);
+      res.render('home', { 
+        ...context , user: req.oidc.user , userInformation: req.oidc});
+    } catch (error) {
+      console.error('Home Controller Error:', error);
+      const errorContext = this.presenter.presentError(error);
+      res.status(500).render('home', errorContext);
+    }
+  }
+
+   /**
+   * Display home page
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   */
+  async profile(req, res) {
+    try {
+      const context = this.presenter.presentHomePage();
+      res.render('callback', { 
+        ...context , user: req.oidc.user , userInformation: req.oidc});
     } catch (error) {
       console.error('Home Controller Error:', error);
       const errorContext = this.presenter.presentError(error);

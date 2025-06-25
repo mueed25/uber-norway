@@ -9,6 +9,13 @@ router.get('/', (req, res) => {
   homeController.index(req, res);
 });
 
+router.get('/callback', (req, res) => {
+  homeController.index(req, res);
+});
+
+router.get('/complete-profile', (req, res) => {
+  homeController.profile(req, res);
+});
 // POST /estimate - Trip estimation (form submission)
 router.post('/estimate', (req, res) => {
   homeController.estimateTrip(req, res);
