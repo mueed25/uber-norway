@@ -1,21 +1,33 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
-  fullName: {
+  auth0Id: {
     type: String,
     required: true,
+    unique: true
+  },
+  email: {
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true
+  },
+  fullName: {
+    type: String,
     trim: true
   },
   age: {
     type: Number,
-    required: true,
     min: 0
   },
   phone: {
     type: String,
-    required: true,
     trim: true,
-    match: /^[0-9()+\-\s]+$/  // basic phone number validation
+    match: /^[0-9()+\-\s]+$/
+  },
+  profileComplete: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
