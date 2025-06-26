@@ -1,7 +1,6 @@
 const basePresenter = require('./basePresenter');
 
 class TripPresenter extends basePresenter {
-  // Format trip estimate data for frontend
   formatEstimate(estimateData) {
     return {
       distance: `${estimateData.distance}`,
@@ -16,7 +15,6 @@ class TripPresenter extends basePresenter {
     };
   }
 
-  // Format trip data for display
   formatTrip(trip) {
     return {
       id: trip._id,
@@ -33,12 +31,10 @@ class TripPresenter extends basePresenter {
     };
   }
 
-  // Format multiple trips for listing
   formatTripList(trips) {
     return trips.map(trip => this.formatTripSummary(trip));
   }
 
-  // Format trip summary for listings
   formatTripSummary(trip) {
     return {
       id: trip._id,
@@ -51,7 +47,6 @@ class TripPresenter extends basePresenter {
     };
   }
 
-  // Format trip status with styling classes
   formatStatus(status) {
     const statusMap = {
       pending: { text: 'Pending', class: 'status-pending' },
@@ -64,7 +59,6 @@ class TripPresenter extends basePresenter {
     return statusMap[status] || { text: 'Unknown', class: 'status-default' };
   }
 
-  // Format driver information
   formatDriver(driver) {
     return {
       name: driver.name,
@@ -75,7 +69,6 @@ class TripPresenter extends basePresenter {
     };
   }
 
-  // Calculate price breakdown
   calculatePriceBreakdown(estimateData) {
     const baseRate = 2.50;
     const perKmRate = 1.20;
@@ -92,7 +85,6 @@ class TripPresenter extends basePresenter {
     };
   }
 
-  // Format price with currency
   formatPrice(amount, currency = 'USD') {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -101,13 +93,11 @@ class TripPresenter extends basePresenter {
     }).format(amount);
   }
 
-  // Format rating with stars
   formatRating(rating) {
     const stars = '★'.repeat(Math.floor(rating)) + '☆'.repeat(5 - Math.floor(rating));
     return `${stars} ${rating}/5`;
   }
 
-  // Truncate long addresses for display
   truncateAddress(address, maxLength = 30) {
     if (!address) return '';
     return address.length > maxLength 
@@ -115,7 +105,6 @@ class TripPresenter extends basePresenter {
       : address;
   }
 
-  // Format date and time for display
   formatDateTime(dateTime) {
     if (!dateTime) return '';
     
@@ -130,7 +119,6 @@ class TripPresenter extends basePresenter {
     });
   }
 
-  // Format date only
   formatDate(date) {
     if (!date) return '';
     
@@ -141,7 +129,6 @@ class TripPresenter extends basePresenter {
     });
   }
 
-  // Format relative time (e.g., "2 hours ago")
   formatRelativeTime(date) {
     if (!date) return '';
     

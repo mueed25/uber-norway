@@ -61,6 +61,29 @@ const TripSchema = new mongoose.Schema({
     enum: ['pending', 'confirmed', 'in-progress', 'completed', 'cancelled'],
     default: 'pending'
   },
+  stripeSessionId: {
+  type: String,
+  default: null
+  },
+  paymentStatus: {
+  type: String,
+  enum: ['unpaid', 'paid', 'failed'],
+  default: 'unpaid'
+},
+confirmationEmailSent: {
+  type: Boolean,
+  default: false
+},
+ride: {
+  type: {
+    type: String, // e.g. 'standard'
+    required: true
+  },
+  price: {
+    type: Number,
+    required: true
+  },
+},
   tripType: {
     type: String,
     enum: ['standard', 'premium', 'xl'],
@@ -75,7 +98,6 @@ const TripSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Virtual for formatted date
 TripSchema.virtual('formattedDate').get(function() {
   return this.scheduledDate.toLocaleDateString('en-US', {
     weekday: 'short',
@@ -85,7 +107,6 @@ TripSchema.virtual('formattedDate').get(function() {
   });
 });
 
-// Virtual for formatted time (12-hour format)
 TripSchema.virtual('formattedTime').get(function() {
   const [hours, minutes] = this.scheduledTime.split(':');
   const hour12 = ((parseInt(hours, 10) + 11) % 12) + 1;
@@ -93,7 +114,6 @@ TripSchema.virtual('formattedTime').get(function() {
   return `${hour12}:${minutes} ${ampm}`;
 });
 
-// Instance method to calculate estimated price based on distance
 TripSchema.methods.calculatePrice = function(baseRate = 2.5, perKmRate = 1.8) {
   if (this.distance > 0) {
     this.estimatedPrice = Math.round((baseRate + (this.distance * perKmRate)) * 100) / 100;
@@ -101,7 +121,6 @@ TripSchema.methods.calculatePrice = function(baseRate = 2.5, perKmRate = 1.8) {
   return this.estimatedPrice;
 };
 
-// Static method to find trips by date range
 TripSchema.statics.findByDateRange = function(startDate, endDate) {
   return this.find({
     scheduledDate: {
@@ -111,7 +130,6 @@ TripSchema.statics.findByDateRange = function(startDate, endDate) {
   });
 };
 
-// Pre-save middleware to ensure coordinates are valid
 TripSchema.pre('save', function(next) {
   const pickup = this.pickup.coordinates;
   const destination = this.destination.coordinates;

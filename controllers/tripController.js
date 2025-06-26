@@ -1,16 +1,13 @@
 class TripController {
-  // Book a new trip
   bookTrip(req, res) {
     try {
       const { userId, carId, startDate, endDate, pickupLocation, dropoffLocation } = req.body;
       
-      // Validation
       if (!userId || !carId || !startDate || !endDate) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
-      // Simulate trip booking logic
-      const tripId = Date.now().toString(); // Simple ID generation
+      const tripId = Date.now().toString(); 
       const trip = {
         id: tripId,
         userId,
@@ -29,12 +26,10 @@ class TripController {
     }
   }
 
-  // Get trip details
   getTripDetails(req, res) {
     try {
       const { id } = req.params;
       
-      // Simulate fetching trip from database
       const trip = {
         id,
         userId: 'user123',
@@ -53,13 +48,11 @@ class TripController {
     }
   }
 
-  // Update trip
   updateTrip(req, res) {
     try {
       const { id } = req.params;
       const updates = req.body;
 
-      // Simulate trip update
       const updatedTrip = {
         id,
         ...updates,
@@ -72,12 +65,9 @@ class TripController {
     }
   }
 
-  // Cancel trip
   cancelTrip(req, res) {
     try {
       const { id } = req.params;
-
-      // Simulate trip cancellation
       res.json({ 
         message: 'Trip cancelled successfully', 
         tripId: id,

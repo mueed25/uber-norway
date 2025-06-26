@@ -1,5 +1,5 @@
 class BaseController {
-  // Standard success response format
+  
   successResponse(res, data = null, message = 'Success', statusCode = 200) {
     return res.status(statusCode).json({
       success: true,
@@ -8,8 +8,6 @@ class BaseController {
       timestamp: new Date().toISOString()
     });
   }
-
-  // Standard error response format
   errorResponse(res, message = 'An error occurred', statusCode = 500, errors = null) {
     return res.status(statusCode).json({
       success: false,
@@ -19,29 +17,24 @@ class BaseController {
     });
   }
 
-  // Validation error response
   validationError(res, errors) {
     return this.errorResponse(res, 'Validation failed', 422, errors);
   }
 
-  // Not found response
   notFoundResponse(res, resource = 'Resource') {
     return this.errorResponse(res, `${resource} not found`, 404);
   }
 
-  // Unauthorized response
   unauthorizedResponse(res, message = 'Unauthorized access') {
     return this.errorResponse(res, message, 401);
   }
 
-  // Handle async errors
   asyncHandler(fn) {
     return (req, res, next) => {
       Promise.resolve(fn(req, res, next)).catch(next);
     };
   }
 
-  // Extract pagination parameters
   getPaginationParams(req) {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
@@ -50,7 +43,6 @@ class BaseController {
     return { page, limit, skip };
   }
 
-  // Format pagination response
   formatPaginatedResponse(data, totalCount, page, limit) {
     const totalPages = Math.ceil(totalCount / limit);
     
@@ -67,7 +59,6 @@ class BaseController {
     };
   }
 
-  // Validate required fields
   validateRequiredFields(body, requiredFields) {
     const errors = [];
     
@@ -80,7 +71,6 @@ class BaseController {
     return errors;
   }
 
-  // Sanitize input data
   sanitizeInput(data) {
     if (typeof data !== 'object' || data === null) return data;
     

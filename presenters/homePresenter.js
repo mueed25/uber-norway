@@ -1,9 +1,6 @@
 const BasePresenter = require('./basePresenter');
 
-/**
- * Home Presenter - Handles data presentation for the home page
- * Part of the MCP (Model-Controller-Presenter) architecture
- */
+
 class HomePresenter extends BasePresenter {
   constructor() {
     super();
@@ -11,8 +8,8 @@ class HomePresenter extends BasePresenter {
 
   /**
    * Present home page data with default trip booking form
-   * @param {Object} data - Optional data to populate form
-   * @returns {Object} - Context for home page rendering
+   * @param {Object} data - 
+   * @returns {Object} - 
    */
   presentHomePage(data = {}) {
     const context = this.getContext({
@@ -20,7 +17,7 @@ class HomePresenter extends BasePresenter {
       page: 'home',
       bodyClass: 'home-page',
       
-      // Form data
+      
       formData: {
         pickup: data.pickup || '',
         destination: data.destination || '',
@@ -28,7 +25,7 @@ class HomePresenter extends BasePresenter {
         time: data.time || this.getCurrentTime()
       },
 
-      // Default map configuration for Norway (Oslo area)
+      
       mapConfig: {
         center: {
           lat: 59.9139,
@@ -47,7 +44,6 @@ class HomePresenter extends BasePresenter {
         }
       },
 
-      // UI configuration
       ui: {
         showMap: true,
         showPricing: false,
@@ -60,8 +56,8 @@ class HomePresenter extends BasePresenter {
 
   /**
    * Present trip estimation results
-   * @param {Object} tripData - Trip data with estimates
-   * @returns {Object} - Context with trip estimates
+   * @param {Object} tripData - 
+   * @returns {Object} - 
    */
   presentTripEstimate(tripData) {
     const distance = this.calculateDistance(
@@ -116,9 +112,9 @@ class HomePresenter extends BasePresenter {
 
   /**
    * Present error state for home page
-   * @param {Error} error - Error object
-   * @param {Object} formData - Form data to preserve
-   * @returns {Object} - Context with error information
+   * @param {Error} error -
+   * @param {Object} formData -
+   * @returns {Object} -
    */
   presentError(error, formData = {}) {
     const errorContext = this.handleError(error);
@@ -152,7 +148,7 @@ class HomePresenter extends BasePresenter {
 
   /**
    * Get today's date in YYYY-MM-DD format
-   * @returns {String} - Today's date
+   * @returns {String} -
    */
   getTodayDate() {
     return new Date().toISOString().split('T')[0];
@@ -160,7 +156,7 @@ class HomePresenter extends BasePresenter {
 
   /**
    * Get current time in HH:MM format
-   * @returns {String} - Current time
+   * @returns {String} - 
    */
   getCurrentTime() {
     const now = new Date();
@@ -171,34 +167,34 @@ class HomePresenter extends BasePresenter {
 
   /**
    * Estimate trip duration based on distance
-   * @param {Number} distance - Distance in kilometers
-   * @returns {Number} - Estimated duration in minutes
+   * @param {Number} distance - 
+   * @returns {Number} - 
    */
   estimateDuration(distance) {
-    // Basic estimation: 1 km = 2 minutes (city driving with traffic)
+    
     const baseMinutes = distance * 2;
-    // Add buffer time for stops, traffic, etc.
+    
     const bufferTime = Math.min(distance * 0.5, 15);
     return Math.round(baseMinutes + bufferTime);
   }
 
   /**
    * Estimate trip price based on distance
-   * @param {Number} distance - Distance in kilometers
-   * @returns {Number} - Estimated price
+   * @param {Number} distance - 
+   * @returns {Number} - 
    */
   estimatePrice(distance) {
-    const baseRate = 2.5; // Base fare
-    const perKmRate = 1.8; // Per kilometer rate
+    const baseRate = 2.5; 
+    const perKmRate = 1.8; 
     const price = baseRate + (distance * perKmRate);
-    return Math.round(price * 100) / 100; // Round to 2 decimal places
+    return Math.round(price * 100) / 100;
   }
 
   /**
    * Calculate map center point between pickup and destination
-   * @param {Object} pickup - Pickup coordinates
-   * @param {Object} destination - Destination coordinates
-   * @returns {Object} - Center coordinates
+   * @param {Object} pickup - 
+   * @param {Object} destination - 
+   * @returns {Object} -
    */
   calculateCenter(pickup, destination) {
     return {
@@ -209,8 +205,8 @@ class HomePresenter extends BasePresenter {
 
   /**
    * Calculate appropriate zoom level based on distance
-   * @param {Number} distance - Distance in kilometers
-   * @returns {Number} - Zoom level
+   * @param {Number} distance - 
+   * @returns {Number} - 
    */
   calculateZoom(distance) {
     if (distance < 5) return 13;

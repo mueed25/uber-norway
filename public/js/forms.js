@@ -1,4 +1,4 @@
-// Form validation and interaction handling
+
 class FormHandler {
     constructor() {
         this.form = document.getElementById('tripForm');
@@ -6,10 +6,10 @@ class FormHandler {
         this.destinationInput = document.getElementById('destination');
         this.dateInput = document.getElementById('date');
         this.timeInput = document.getElementById('time');
-        this.submitBtn = document.getElementById('seePricesBtn');
+       
+        this.submitBtn = this.form.querySelector('button[type="submit"]');
         this.bookTripBtn = document.getElementById('bookTripBtn');
         
-        // Autocomplete instances
         this.pickupAutocomplete = null;
         this.destinationAutocomplete = null;
         
@@ -24,14 +24,12 @@ class FormHandler {
     }
     
     setDefaultDateTime() {
-        // Set default date to today
         const today = new Date();
         const dateStr = today.toISOString().split('T')[0];
         if (!this.dateInput.value) {
             this.dateInput.value = dateStr;
         }
         
-        // Set default time to current time + 15 minutes
         const futureTime = new Date(today.getTime() + 15 * 60000);
         const timeStr = futureTime.toTimeString().slice(0, 5);
         if (!this.timeInput.value) {
@@ -40,26 +38,21 @@ class FormHandler {
     }
     
     setupEventListeners() {
-        // Form submission
         this.form.addEventListener('submit', (e) => this.handleFormSubmit(e));
         
-        // Real-time validation
         [this.pickupInput, this.destinationInput, this.dateInput, this.timeInput].forEach(input => {
             input.addEventListener('input', () => this.validateForm());
             input.addEventListener('blur', () => this.validateField(input));
         });
         
-        // Book trip button
         if (this.bookTripBtn) {
             this.bookTripBtn.addEventListener('click', (e) => this.handleBookTrip(e));
         }
         
-        // Clear button functionality
         this.setupClearButtons();
     }
     
     setupClearButtons() {
-        // Add clear buttons to location inputs
         [this.pickupInput, this.destinationInput].forEach(input => {
             const clearBtn = document.createElement('button');
             clearBtn.type = 'button';
@@ -72,7 +65,6 @@ class FormHandler {
                 input.focus();
                 this.validateForm();
                 
-                // Clear corresponding marker from map
                 if (window.mapHandler) {
                     if (input === this.pickupInput) {
                         window.mapHandler.clearPickupMarker();
@@ -86,7 +78,6 @@ class FormHandler {
             wrapper.style.position = 'relative';
             wrapper.appendChild(clearBtn);
             
-            // Show/hide clear button based on input value
             input.addEventListener('input', () => {
                 clearBtn.style.display = input.value ? 'block' : 'none';
             });
@@ -94,17 +85,15 @@ class FormHandler {
     }
     
     setupLocationAutocomplete() {
-        // Wait for Google Maps to be available
         if (typeof google === 'undefined' || !google.maps) {
             console.warn('Google Maps API not loaded, retrying in 1 second...');
             setTimeout(() => this.setupLocationAutocomplete(), 1000);
             return;
         }
         
-        // Setup Google Places Autocomplete for location inputs
         const options = {
             types: ['geocode'],
-            componentRestrictions: { country: 'no' }, // Restrict to Norway
+            componentRestrictions: { country: 'no' }, 
             fields: ['formatted_address', 'geometry', 'name']
         };
         
@@ -112,20 +101,16 @@ class FormHandler {
             this.pickupAutocomplete = new google.maps.places.Autocomplete(this.pickupInput, options);
             this.destinationAutocomplete = new google.maps.places.Autocomplete(this.destinationInput, options);
             
-            // Pickup autocomplete listener
             this.pickupAutocomplete.addListener('place_changed', () => {
                 const place = this.pickupAutocomplete.getPlace();
                 console.log('Pickup place selected:', place);
                 
                 if (place.geometry && place.geometry.location) {
-                    // Store coordinates
                     this.pickupInput.dataset.lat = place.geometry.location.lat();
                     this.pickupInput.dataset.lng = place.geometry.location.lng();
                     
-                    // Update form validation
                     this.validateForm();
                     
-                    // Update map
                     if (window.mapHandler) {
                         window.mapHandler.updatePickupLocation(place.geometry.location);
                     }
@@ -136,23 +121,21 @@ class FormHandler {
                     });
                 } else {
                     console.warn('No geometry found for pickup place');
+                    this.pickupInput.dataset.lat = '';
+                    this.pickupInput.dataset.lng = '';
                 }
             });
             
-            // Destination autocomplete listener
             this.destinationAutocomplete.addListener('place_changed', () => {
                 const place = this.destinationAutocomplete.getPlace();
                 console.log('Destination place selected:', place);
                 
                 if (place.geometry && place.geometry.location) {
-                    // Store coordinates
                     this.destinationInput.dataset.lat = place.geometry.location.lat();
                     this.destinationInput.dataset.lng = place.geometry.location.lng();
                     
-                    // Update form validation
                     this.validateForm();
                     
-                    // Update map
                     if (window.mapHandler) {
                         window.mapHandler.updateDestinationLocation(place.geometry.location);
                     }
@@ -163,6 +146,9 @@ class FormHandler {
                     });
                 } else {
                     console.warn('No geometry found for destination place');
+                    
+                    this.destinationInput.dataset.lat = '';
+                    this.destinationInput.dataset.lng = '';
                 }
             });
             
@@ -173,7 +159,6 @@ class FormHandler {
         }
     }
     
-    // Manual geocoding fallback for typed addresses
     geocodeAddress(address, isPickup = true) {
         if (!address || address.length < 3) return;
         
@@ -186,11 +171,12 @@ class FormHandler {
                 const location = results[0].geometry.location;
                 const input = isPickup ? this.pickupInput : this.destinationInput;
                 
-                // Store coordinates
+             
                 input.dataset.lat = location.lat();
                 input.dataset.lng = location.lng();
+               
+                this.validateForm();
                 
-                // Update map
                 if (window.mapHandler) {
                     if (isPickup) {
                         window.mapHandler.updatePickupLocation(location);
@@ -233,10 +219,10 @@ class FormHandler {
                     isValid = false;
                     errorMessage = 'Please enter a valid location';
                 } else {
-                    // Trigger geocoding for manually typed addresses
+                    // Check if we have coordinates (from autocomplete)
                     const hasCoordinates = field.dataset.lat && field.dataset.lng;
                     if (!hasCoordinates) {
-                        // Debounce geocoding
+                        // Trigger geocoding for manually typed addresses
                         clearTimeout(field.geocodeTimeout);
                         field.geocodeTimeout = setTimeout(() => {
                             this.geocodeAddress(value, field.id === 'pickup');
@@ -264,7 +250,6 @@ class FormHandler {
                     isValid = false;
                     errorMessage = 'Time is required';
                 } else {
-                    // Check if selected time is in the past for today's date
                     const selectedDate = new Date(this.dateInput.value);
                     const today = new Date();
                     
@@ -299,85 +284,100 @@ class FormHandler {
         const date = this.dateInput.value;
         const time = this.timeInput.value;
         
+        const hasPickupCoords = this.pickupInput.dataset.lat && this.pickupInput.dataset.lng;
+        const hasDestinationCoords = this.destinationInput.dataset.lat && this.destinationInput.dataset.lng;
+        
         const isValid = pickup && destination && date && time && 
                        pickup !== destination &&
-                       pickup.length >= 3 && destination.length >= 3;
+                       pickup.length >= 3 && destination.length >= 3 &&
+                       (hasPickupCoords || pickup.length >= 5) && 
+                       (hasDestinationCoords || destination.length >= 5);
         
-        this.submitBtn.disabled = !isValid;
-        this.submitBtn.classList.toggle('disabled', !isValid);
+        if (this.submitBtn) {
+            this.submitBtn.disabled = !isValid;
+            this.submitBtn.classList.toggle('disabled', !isValid);
+        }
         
         return isValid;
     }
 
-handleFormSubmit(e) {
-    e.preventDefault();
-    
-    // Validate all fields
-    const fields = [this.pickupInput, this.destinationInput, this.dateInput, this.timeInput];
-    let allValid = true;
-    
-    fields.forEach(field => {
-        if (!this.validateField(field)) {
+    handleFormSubmit(e) {
+        e.preventDefault();
+        
+        const fields = [this.pickupInput, this.destinationInput, this.dateInput, this.timeInput];
+        let allValid = true;
+        
+        fields.forEach(field => {
+            if (!this.validateField(field)) {
+                allValid = false;
+            }
+        });
+        
+        if (this.pickupInput.value.trim().toLowerCase() === this.destinationInput.value.trim().toLowerCase()) {
+            this.showError('Pickup and destination cannot be the same location');
             allValid = false;
         }
-    });
-    
-    // Check if pickup and destination are the same
-    if (this.pickupInput.value.trim().toLowerCase() === this.destinationInput.value.trim().toLowerCase()) {
-        this.showError('Pickup and destination cannot be the same location');
-        allValid = false;
-    }
-    
-    if (!allValid) {
-        return;
-    }
-    
-    // Show loading state
-    this.setLoadingState(true);
-    
-    // Prepare data as JSON instead of FormData
-    const formData = {
-        pickup: this.pickupInput.value.trim(),
-        destination: this.destinationInput.value.trim(),
-        date: this.dateInput.value,
-        time: this.timeInput.value,
-        pickup_lat: this.pickupInput.dataset.lat || '',
-        pickup_lng: this.pickupInput.dataset.lng || '',
-        destination_lat: this.destinationInput.dataset.lat || '',
-        destination_lng: this.destinationInput.dataset.lng || ''
-    };
-    
-    console.log('Sending data:', formData);
-    
-    fetch('/estimate', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Handle success response
-            window.location.reload();
-        } else {
-            this.showError(data.message || 'Failed to get trip estimate');
+        
+        const hasPickupCoords = this.pickupInput.dataset.lat && this.pickupInput.dataset.lng;
+        const hasDestinationCoords = this.destinationInput.dataset.lat && this.destinationInput.dataset.lng;
+        
+        if (!hasPickupCoords) {
+            this.showError('Please select a pickup location from the suggestions');
+            allValid = false;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        this.showError('Network error. Please try again o.');
-    })
-    .finally(() => {
-        this.setLoadingState(false);
-    });
-}
+        
+        if (!hasDestinationCoords) {
+            this.showError('Please select a destination from the suggestions');
+            allValid = false;
+        }
+        
+        if (!allValid) {
+            return;
+        }
+        
+        this.setLoadingState(true);
+        
+        const formData = {
+            pickup: this.pickupInput.value.trim(),
+            destination: this.destinationInput.value.trim(),
+            date: this.dateInput.value,
+            time: this.timeInput.value,
+            pickup_lat: this.pickupInput.dataset.lat || '',
+            pickup_lng: this.pickupInput.dataset.lng || '',
+            destination_lat: this.destinationInput.dataset.lat || '',
+            destination_lng: this.destinationInput.dataset.lng || ''
+        };
+        
+        console.log('Sending data:', formData);
+        
+        fetch('/estimate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Trip estimate received:', data);
+                window.location.href = window.location.pathname + '?estimated=true';
+            } else {
+                this.showError(data.message || 'Failed to get trip estimate');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            this.showError('Network error. Please try again.');
+        })
+        .finally(() => {
+            this.setLoadingState(false);
+        });
+    }
     
     handleBookTrip(e) {
         e.preventDefault();
         
-        // Show confirmation dialog
         if (confirm('Confirm booking this trip?')) {
             this.setLoadingState(true, 'Booking...');
             
@@ -395,7 +395,7 @@ handleFormSubmit(e) {
             .then(data => {
                 if (data.success) {
                     this.showSuccess('Trip booked successfully! You will receive confirmation shortly.');
-                    // Reset form after successful booking
+              
                     setTimeout(() => {
                         window.location.href = '/';
                     }, 2000);
@@ -415,18 +415,22 @@ handleFormSubmit(e) {
     
     setLoadingState(loading, text = 'Loading...') {
         if (loading) {
-            this.submitBtn.disabled = true;
-            this.submitBtn.textContent = text;
-            this.submitBtn.classList.add('loading');
+            if (this.submitBtn) {
+                this.submitBtn.disabled = true;
+                this.submitBtn.textContent = text;
+                this.submitBtn.classList.add('loading');
+            }
             
             if (this.bookTripBtn) {
                 this.bookTripBtn.disabled = true;
                 this.bookTripBtn.classList.add('loading');
             }
         } else {
-            this.submitBtn.disabled = false;
-            this.submitBtn.textContent = 'See prices';
-            this.submitBtn.classList.remove('loading');
+            if (this.submitBtn) {
+                this.submitBtn.disabled = false;
+                this.submitBtn.textContent = 'See prices';
+                this.submitBtn.classList.remove('loading');
+            }
             
             if (this.bookTripBtn) {
                 this.bookTripBtn.disabled = false;
@@ -450,7 +454,6 @@ handleFormSubmit(e) {
             existingAlert.remove();
         }
         
-        // Create new alert
         const alert = document.createElement('div');
         alert.className = `form-alert alert-${type}`;
         alert.innerHTML = `
@@ -458,10 +461,8 @@ handleFormSubmit(e) {
             <button type="button" class="alert-close" onclick="this.parentElement.remove()">×</button>
         `;
         
-        // Insert at top of form
         this.form.insertBefore(alert, this.form.firstChild);
         
-        // Auto-remove after 5 seconds
         setTimeout(() => {
             if (alert.parentNode) {
                 alert.remove();
@@ -469,7 +470,6 @@ handleFormSubmit(e) {
         }, 5000);
     }
     
-    // Public methods for external use
     setPickupLocation(lat, lng, address = '') {
         this.pickupInput.value = address;
         this.pickupInput.dataset.lat = lat;
@@ -485,7 +485,6 @@ handleFormSubmit(e) {
     }
 }
 
-// Initialize form handler when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('tripForm')) {
         window.formHandler = new FormHandler();

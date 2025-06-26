@@ -1,7 +1,4 @@
-/**
- * Base Presenter - Common functionality for all presenters
- * Part of the MCP (Model-Controller-Presenter) architecture
- */
+
 class BasePresenter {
   constructor() {
     this.defaultContext = {
@@ -13,8 +10,8 @@ class BasePresenter {
 
   /**
    * Merge default context with specific page context
-   * @param {Object} pageContext - Specific context for the page
-   * @returns {Object} - Merged context
+   * @param {Object} pageContext - 
+   * @returns {Object} - 
    */
   getContext(pageContext = {}) {
     return {
@@ -25,8 +22,8 @@ class BasePresenter {
 
   /**
    * Format date for display
-   * @param {Date} date - Date to format
-   * @returns {String} - Formatted date string
+   * @param {Date} date - 
+   * @returns {String} - F
    */
   formatDate(date) {
     return new Date(date).toLocaleDateString('en-US', {
@@ -39,8 +36,8 @@ class BasePresenter {
 
   /**
    * Format time from 24-hour to 12-hour format
-   * @param {String} time24 - Time in 24-hour format (HH:MM)
-   * @returns {String} - Time in 12-hour format
+   * @param {String} time24 - T
+   * @returns {String} - 
    */
   formatTime(time24) {
     const [hours, minutes] = time24.split(':');
@@ -51,9 +48,9 @@ class BasePresenter {
 
   /**
    * Format currency
-   * @param {Number} amount - Amount to format
-   * @param {String} currency - Currency code (default: USD)
-   * @returns {String} - Formatted currency string
+   * @param {Number} amount - 
+   * @param {String} currency -
+   * @returns {String} - 
    */
   formatCurrency(amount, currency = 'USD') {
     return new Intl.NumberFormat('en-US', {
@@ -64,12 +61,12 @@ class BasePresenter {
 
   /**
    * Calculate distance between two coordinates (Haversine formula)
-   * @param {Object} coord1 - First coordinate {lat, lng}
-   * @param {Object} coord2 - Second coordinate {lat, lng}
-   * @returns {Number} - Distance in kilometers
+   * @param {Object} coord1 - 
+   * @param {Object} coord2 - S
+   * @returns {Number} - 
    */
   calculateDistance(coord1, coord2) {
-    const R = 6371; // Radius of the Earth in km
+    const R = 6371; 
     const dLat = this.deg2rad(coord2.lat - coord1.lat);
     const dLon = this.deg2rad(coord2.lng - coord1.lng);
     const a = 
@@ -77,14 +74,14 @@ class BasePresenter {
       Math.cos(this.deg2rad(coord1.lat)) * Math.cos(this.deg2rad(coord2.lat)) * 
       Math.sin(dLon/2) * Math.sin(dLon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const distance = R * c; // Distance in km
-    return Math.round(distance * 100) / 100; // Round to 2 decimal places
+    const distance = R * c; 
+    return Math.round(distance * 100) / 100; 
   }
 
   /**
    * Convert degrees to radians
-   * @param {Number} deg - Degrees
-   * @returns {Number} - Radians
+   * @param {Number} deg - 
+   * @returns {Number} - 
    */
   deg2rad(deg) {
     return deg * (Math.PI/180);
@@ -92,8 +89,8 @@ class BasePresenter {
 
   /**
    * Validate coordinates
-   * @param {Object} coordinates - {lat, lng}
-   * @returns {Boolean} - True if valid
+   * @param {Object} coordinates - 
+   * @returns {Boolean} - 
    */
   isValidCoordinates(coordinates) {
     if (!coordinates || typeof coordinates.lat !== 'number' || typeof coordinates.lng !== 'number') {
@@ -108,8 +105,8 @@ class BasePresenter {
 
   /**
    * Handle errors and format them for display
-   * @param {Error} error - Error object
-   * @returns {Object} - Formatted error context
+   * @param {Error} error - 
+   * @returns {Object} - 
    */
   handleError(error) {
     console.error('Presenter Error:', error);

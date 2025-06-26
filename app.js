@@ -1,4 +1,4 @@
-// ==================== app.js (Updated) ====================
+// ==================== Fixed Auth0 Configuration ====================
 const express = require('express');
 const { engine } = require('express-handlebars');
 const path = require('path');
@@ -10,7 +10,7 @@ require('dotenv').config();
 const { auth } = require('express-openid-connect');
 
 // Import User model BEFORE using it
-const User = require('./models/user');
+const User = require('./models/User');
 
 const config = {
   authRequired: false,
@@ -29,25 +29,54 @@ const config = {
   },
   afterCallback: async (req, res, session) => {
     try {
-      const auth0Id = session.user.sub;
+      console.log('AfterCallback triggered');
+      console.log('Full session object:', JSON.stringify(session, null, 2));
+      console.log('Session keys:', Object.keys(session));
+      
+      // The user data might be directly in session or in session.user
+      let userData = session.user || session;
+      
+      console.log('User data:', userData);
+      console.log('User sub/id:', userData.sub);
+      console.log('User email:', userData.email);
+
+      if (!userData || !userData.sub) {
+        console.log('No user data found in session');
+        console.log('Available session data:', session);
+        return session;
+      }
+      
+      const auth0Id = userData.sub;
       let user = await User.findOne({ auth0Id });
       
       if (!user) {
+        console.log('Creating new user for:', userData.email);
         // Create minimal user record
         user = await User.create({
           auth0Id,
-          email: session.user.email,
+          email: userData.email,
           profileComplete: false
         });
+        console.log('New user created:', user._id);
+      } else {
+        console.log('Existing user found:', user._id);
       }
       
-      // Store user info in session
+      // Ensure session.user exists and add our custom properties
+      if (!session.user) {
+        session.user = userData;
+      }
+      
       session.user.appUserId = user._id.toString();
       session.user.profileComplete = user.profileComplete;
+      
+      console.log('Session updated - profileComplete:', user.profileComplete);
+      console.log('Final session.user:', session.user);
       
       return session;
     } catch (error) {
       console.error('afterCallback error:', error);
+      console.error('Error stack:', error.stack);
       return session;
     }
   }
@@ -62,10 +91,23 @@ const helpers = require('./utils/helpers');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Connect to database first
 connectDatabase();
 
 // Middleware setup
 app.use(auth(config));
+
+// Add debugging middleware to see what's in the session
+app.use((req, res, next) => {
+  if (req.oidc.isAuthenticated()) {
+    console.log('=== Session Debug Info ===');
+    console.log('req.oidc.user:', req.oidc.user);
+    console.log('req.oidc.isAuthenticated():', req.oidc.isAuthenticated());
+    console.log('========================');
+  }
+  next();
+});
+
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -78,6 +120,7 @@ app.use(helmet({
     }
   }
 }));
+
 app.use(compression());
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -95,10 +138,52 @@ app.engine('hbs', engine({
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Profile completion middleware
+// Global middleware to sync user data with database
+app.use(async (req, res, next) => {
+  if (req.oidc.isAuthenticated() && req.oidc.user && req.oidc.user.sub) {
+    try {
+      const user = await User.findOne({ auth0Id: req.oidc.user.sub });
+      if (user) {
+        // Sync session with database
+        req.oidc.user.profileComplete = user.profileComplete;
+        req.oidc.user.appUserId = user._id.toString();
+        console.log('Synced user data - profileComplete:', user.profileComplete);
+      } else {
+        console.log('No user found in database for:', req.oidc.user.sub);
+        // Create user if not exists
+        const newUser = await User.create({
+          auth0Id: req.oidc.user.sub,
+          email: req.oidc.user.email,
+          profileComplete: false
+        });
+        req.oidc.user.profileComplete = false;
+        req.oidc.user.appUserId = newUser._id.toString();
+        console.log('Created new user:', newUser._id);
+      }
+    } catch (error) {
+      console.error('User sync error:', error);
+    }
+  }
+  next();
+});
+
+// Profile completion middleware for protected routes
 const requireCompleteProfile = (req, res, next) => {
-  if (req.oidc.isAuthenticated() && req.oidc.user && !req.oidc.user.profileComplete) {
-    return res.redirect('/complete-profile');
+  console.log('Checking profile completion...');
+  console.log('Authenticated:', req.oidc.isAuthenticated());
+  
+  if (req.oidc.isAuthenticated() && req.oidc.user) {
+    console.log('Profile complete status:', req.oidc.user.profileComplete);
+    
+    // Skip profile check for profile completion routes
+    if (req.path === '/complete-profile' || req.path === '/logout') {
+      return next();
+    }
+    
+    if (!req.oidc.user.profileComplete) {
+      console.log('Redirecting to complete profile');
+      return res.redirect('/complete-profile');
+    }
   }
   next();
 };

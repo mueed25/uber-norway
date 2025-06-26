@@ -1,4 +1,4 @@
-// Google Maps integration for Uber Clone
+
 class MapHandler {
     constructor() {
         this.map = null;
@@ -9,7 +9,6 @@ class MapHandler {
         this.userLocationMarker = null;
         this.infoWindows = [];
         
-        // Default center (Oslo, Norway)
         this.defaultCenter = { lat: 59.9139, lng: 10.7522 };
         this.userLocation = null;
         
@@ -17,7 +16,6 @@ class MapHandler {
     }
     
     init() {
-        // Wait for Google Maps API to load
         if (typeof google === 'undefined' || !google.maps) {
             console.warn('Google Maps API not loaded, retrying in 1 second...');
             setTimeout(() => this.init(), 1000);
@@ -37,7 +35,6 @@ class MapHandler {
             return;
         }
         
-        // Map options
         const mapOptions = {
             zoom: 12,
             center: this.defaultCenter,
@@ -51,13 +48,11 @@ class MapHandler {
             gestureHandling: 'cooperative'
         };
         
-        // Initialize map
         this.map = new google.maps.Map(mapElement, mapOptions);
         
-        // Initialize directions service and renderer
         this.directionsService = new google.maps.DirectionsService();
         this.directionsRenderer = new google.maps.DirectionsRenderer({
-            suppressMarkers: true, // We'll use custom markers
+            suppressMarkers: true, 
             polylineOptions: {
                 strokeColor: '#000000',
                 strokeWeight: 4,
@@ -66,7 +61,6 @@ class MapHandler {
         });
         this.directionsRenderer.setMap(this.map);
         
-        // Add traffic layer
         const trafficLayer = new google.maps.TrafficLayer();
         trafficLayer.setMap(this.map);
         
@@ -74,13 +68,11 @@ class MapHandler {
     }
     
     setupEventListeners() {
-        // Listen for map clicks
         if (this.map) {
             this.map.addListener('click', (e) => {
                 this.handleMapClick(e);
             });
             
-            // Listen for zoom changes
             this.map.addListener('zoom_changed', () => {
                 this.adjustMarkersForZoom();
             });
@@ -98,7 +90,6 @@ class MapHandler {
                     
                     console.log('User location obtained:', this.userLocation);
                     
-                    // Center map on user location if in Norway area
                     if (this.isInNorway(this.userLocation)) {
                         this.map.setCenter(this.userLocation);
                         this.addUserLocationMarker();
@@ -106,13 +97,12 @@ class MapHandler {
                 },
                 (error) => {
                     console.warn('Geolocation error:', error);
-                    // Use default location (Oslo)
                     this.map.setCenter(this.defaultCenter);
                 },
                 {
                     enableHighAccuracy: true,
                     timeout: 10000,
-                    maximumAge: 300000 // 5 minutes
+                    maximumAge: 300000 
                 }
             );
         } else {
@@ -122,7 +112,6 @@ class MapHandler {
     }
     
     isInNorway(location) {
-        // Rough bounds for Norway
         return location.lat >= 58 && location.lat <= 72 && 
                location.lng >= 4 && location.lng <= 32;
     }
@@ -156,28 +145,23 @@ class MapHandler {
         
         console.log('Map clicked at:', clickedLocation);
         
-        // Reverse geocode to get address
         this.reverseGeocode(clickedLocation).then(address => {
             console.log('Reverse geocoded address:', address);
             
-            // Determine which input to fill based on current form state
             const pickupInput = document.getElementById('pickup');
             const destinationInput = document.getElementById('destination');
             
             if (!pickupInput.value) {
-                // Fill pickup
                 if (window.formHandler) {
                     window.formHandler.setPickupLocation(clickedLocation.lat, clickedLocation.lng, address);
                 }
                 this.updatePickupLocation(event.latLng);
             } else if (!destinationInput.value) {
-                // Fill destination
                 if (window.formHandler) {
                     window.formHandler.setDestinationLocation(clickedLocation.lat, clickedLocation.lng, address);
                 }
                 this.updateDestinationLocation(event.latLng);
             } else {
-                // Both filled, replace destination
                 if (window.formHandler) {
                     window.formHandler.setDestinationLocation(clickedLocation.lat, clickedLocation.lng, address);
                 }
@@ -207,12 +191,10 @@ class MapHandler {
     updatePickupLocation(location) {
         console.log('Updating pickup location:', location);
         
-        // Remove existing pickup marker
         if (this.pickupMarker) {
             this.pickupMarker.setMap(null);
         }
         
-        // Add new pickup marker
         this.pickupMarker = new google.maps.Marker({
             position: location,
             map: this.map,

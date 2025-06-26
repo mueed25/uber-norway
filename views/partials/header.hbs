@@ -1,39 +1,44 @@
 <header class="app-header">
-    <div class="container">
-        <div class="header-content">
-            <div class="logo">
-                <a href="/" class="logo-link">
-                    <span class="logo-text">Zamzamelite</span>
-                </a>
-            </div>
-            
-            <nav class="main-nav">
-                <ul class="nav-list">
-                    <li class="nav-item">
-                        <a href="/" class="nav-link {{#if (eq page 'home')}}active{{/if}}">
-                            Ride
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="/drive" class="nav-link">
-                            Drive
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="/business" class="nav-link">
-                            Business
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            
-            <div class="header-actions">
-                <a href="/login" >
-                <button class="btn btn-primary btn-sm">
-                    Sign up
-                </button>
-                </a>
-            </div>
-        </div>
+  <div class="container">
+    <div class="header-content">
+
+      <div class="logo">
+        <a href="/" class="logo-link">
+          <span class="logo-text">Zamzamelite</span>
+        </a>
+      </div>
+
+      <div class="header-actions">
+        {{#if user}}
+        <button class="btn btn-primary btn-sm">Account</button>
+        {{else}}
+        <a href="/login" >
+            <button class="btn btn-primary btn-sm">Log in</button>
+        </a>
+        <a href="/login" >
+            <button class="btn btn-primary btn-sm">Sign up</button>
+        </a>
+        {{/if}}
+
+        <button id="hamburgerBtn" class="hamburger" aria-label="Menu">&#9776;</button>
+      </div>
+
+      <nav class="main-nav">
+        <ul class="nav-list">
+          <li><a href="/" class="nav-link">Ride</a></li>
+          <li><a href="/drive" class="nav-link">Drive</a></li>
+          <li><a href="/business" class="nav-link">Business</a></li>
+        </ul>
+      </nav>
     </div>
+  </div>
+
+  <div id="mobileMenu" class="mobile-menu">
+    <button id="closeMenu" class="close-btn">&times;</button>
+    <nav class="mobile-nav">
+      <a href="/">Ride</a>
+      <a href="/drive">Drive</a>
+      <a href="/business">Business</a>
+    </nav>
+  </div>
 </header>

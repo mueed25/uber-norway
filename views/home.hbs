@@ -1,31 +1,20 @@
 <div class="home-container">
-    <!-- Hero Section -->
-   
-
     <!-- Main Booking Interface -->
     <section class="booking-section">
         <div class="container">
             <div class="booking-layout">
                 <!-- Left Panel - Booking Form -->
                 <div class="booking-panel">
-                     
+
                     <div class="booking-form-container">
                         <section class="hero-section">
-                        <div class="container">
-                            <div class="hero-content">
-                                <h1 class="hero-title">Go anywhere with Zamzamelite</h1>
-                                <h1>Welcome</h1>
-{{#if user}}
-  <p>Hello, {{user.name}}</p>
-  <a href="/profile">Profile</a>
-  <a href="/logout">Logout</a>
-{{else}}
-  <a href="/login">Login</a>
-{{/if}}
+                            <div class="container">
+                                <div class="hero-content">
+                                    <h1 class="hero-title">Go anywhere with Zamzamelite</h1>
+                                </div>
                             </div>
-                        </div>
-                    </section>
-                        
+                        </section>
+
                         {{#if error}}
                         <div class="alert alert-error">
                             <p>{{error.message}}</p>
@@ -33,46 +22,49 @@
                         {{/if}}
 
                         <form class="booking-form" action="/estimate" method="POST" id="tripForm">
+
                             <!-- Pickup Location -->
                             <div class="form-group">
-                                <label for="pickup" class="form-label">
-                                    <span class="location-icon pickup-icon"></span>
-                                    Pickup location
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="pickup" 
-                                    name="pickup" 
-                                    class="form-input location-input" 
-                                    placeholder="Enter pickup location"
-                                    value="{{formData.pickup}}"
-                                    required
-                                    autocomplete="off"
-                                >
+                                <label for="pickup" class="form-label"></label>
+                                <div class="search-container">
+                                    
+                                    <input 
+                                        type="text" 
+                                        id="pickup" 
+                                        name="pickup" 
+                                        class="search-input"
+                                        placeholder="Enter pickup location"
+                                        value="{{formData.pickup}}"
+                                        aria-label="Pickup location"
+                                        required
+                                    />
+                                    
+                                </div>
                             </div>
 
                             <!-- Destination -->
                             <div class="form-group">
-                                <label for="destination" class="form-label">
-                                    <span class="location-icon destination-icon"></span>
-                                    Where to?
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="destination" 
-                                    name="destination" 
-                                    class="form-input location-input" 
-                                    placeholder="Enter destination"
-                                    value="{{formData.destination}}"
-                                    required
-                                    autocomplete="off"
-                                >
+                                <label for="destination" class="form-label"></label>
+                                <div class="search-container">
+                                    
+                                    <input 
+                                        type="text" 
+                                        id="destination" 
+                                        name="destination" 
+                                        class="search-input"
+                                        placeholder="Enter destination"
+                                        value="{{formData.destination}}"
+                                        aria-label="Destination"
+                                        required
+                                    />
+                                
+                                </div>
                             </div>
 
                             <!-- Date and Time Row -->
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="date" class="form-label">Date</label>
+                                    <label for="date" class="form-label"></label>
                                     <input 
                                         type="date" 
                                         id="date" 
@@ -82,8 +74,9 @@
                                         required
                                     >
                                 </div>
+                                
                                 <div class="form-group">
-                                    <label for="time" class="form-label">Time</label>
+                                    <label for="time" class="form-label"></label>
                                     <input 
                                         type="time" 
                                         id="time" 
@@ -93,12 +86,33 @@
                                         required
                                     >
                                 </div>
+
+
                             </div>
 
                             <!-- Submit Button -->
-                            <button type="submit" class="btn btn-primary btn-large btn-full-width" id="seePricesBtn">
-                                See prices
-                            </button>
+                            <div class="cta-row">
+                    {{#if user}}
+                        <!-- Show full-width button when user is logged in -->
+                        <a href="/trip" class="cta-link">
+                        <button type="submit" class="btn-primary w-full btn-nu">
+                        See prices
+                        </button>
+                        </a>
+                    {{else}}
+                        <!-- Show login text when no user is logged in -->
+                        <div class="cta-row">
+                        <a href="/login" class="btn-primary w-full btn-nu">
+                        See prices
+                        </a>
+                        <a href="/login" class="cta-link">
+                        Log in to see your recent activity
+                        </a>
+                        </div>
+                    {{/if}}
+                    </div>
+
+
                         </form>
 
                         <!-- Trip Estimate Results -->
