@@ -53,21 +53,22 @@ class HomeController {
       }
     });
   }
+
   async tripSearch(req, res) {
   try {
     const { pickup, dropoff, pickupTime, rideFor } = req.body;
     
     console.log('Trip search data:', { pickup, dropoff, pickupTime, rideFor });
     
-    const context = this.presenter.presentHomePage();
+    const context = this.presenter.presentHomePage(); 
     res.render('ride', { 
       ...context, 
       user: req.oidc.user, 
       userInformation: req.oidc,
       isAuthenticated: req.oidc.isAuthenticated(),
       ride: rides,
-      pickup: pickup || 'oslo central',
-      dropoff: dropoff || 'oslo airport',
+      pickup: pickup || '',
+      dropoff: dropoff || '',
       pickupTime: pickupTime || 'now',
       rideFor: rideFor || 'me'
     });

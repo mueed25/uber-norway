@@ -22,6 +22,8 @@ class FormHandler {
         this.setupLocationAutocomplete();
         this.validateForm();
     }
+
+    
     
     setDefaultDateTime() {
         const today = new Date();
@@ -101,56 +103,50 @@ class FormHandler {
             this.pickupAutocomplete = new google.maps.places.Autocomplete(this.pickupInput, options);
             this.destinationAutocomplete = new google.maps.places.Autocomplete(this.destinationInput, options);
             
-            this.pickupAutocomplete.addListener('place_changed', () => {
-                const place = this.pickupAutocomplete.getPlace();
-                console.log('Pickup place selected:', place);
-                
-                if (place.geometry && place.geometry.location) {
-                    this.pickupInput.dataset.lat = place.geometry.location.lat();
-                    this.pickupInput.dataset.lng = place.geometry.location.lng();
-                    
-                    this.validateForm();
-                    
-                    if (window.mapHandler) {
-                        window.mapHandler.updatePickupLocation(place.geometry.location);
-                    }
-                    
-                    console.log('Pickup coordinates:', {
-                        lat: place.geometry.location.lat(),
-                        lng: place.geometry.location.lng()
-                    });
-                } else {
-                    console.warn('No geometry found for pickup place');
-                    this.pickupInput.dataset.lat = '';
-                    this.pickupInput.dataset.lng = '';
-                }
-            });
+           // Fix for autocomplete place_changed listeners
+this.pickupAutocomplete.addListener('place_changed', () => {
+    const place = this.pickupAutocomplete.getPlace();
+    console.log('Pickup place selected:', place);
+    
+    if (place.geometry && place.geometry.location) {
+        this.pickupInput.dataset.lat = place.geometry.location.lat();
+        this.pickupInput.dataset.lng = place.geometry.location.lng();
+        
+        // Clear any existing errors for this field
+        const fieldGroup = this.pickupInput.closest('.form-group');
+        fieldGroup.classList.remove('error');
+        const existingError = fieldGroup.querySelector('.field-error');
+        if (existingError) existingError.remove();
+        
+        this.validateForm();
+        
+        if (window.mapHandler) {
+            window.mapHandler.updatePickupLocation(place.geometry.location);
+        }
+    }
+});
             
             this.destinationAutocomplete.addListener('place_changed', () => {
-                const place = this.destinationAutocomplete.getPlace();
-                console.log('Destination place selected:', place);
-                
-                if (place.geometry && place.geometry.location) {
-                    this.destinationInput.dataset.lat = place.geometry.location.lat();
-                    this.destinationInput.dataset.lng = place.geometry.location.lng();
-                    
-                    this.validateForm();
-                    
-                    if (window.mapHandler) {
-                        window.mapHandler.updateDestinationLocation(place.geometry.location);
-                    }
-                    
-                    console.log('Destination coordinates:', {
-                        lat: place.geometry.location.lat(),
-                        lng: place.geometry.location.lng()
-                    });
-                } else {
-                    console.warn('No geometry found for destination place');
-                    
-                    this.destinationInput.dataset.lat = '';
-                    this.destinationInput.dataset.lng = '';
-                }
-            });
+    const place = this.destinationAutocomplete.getPlace();
+    console.log('Destination place selected:', place);
+    
+    if (place.geometry && place.geometry.location) {
+        this.destinationInput.dataset.lat = place.geometry.location.lat();
+        this.destinationInput.dataset.lng = place.geometry.location.lng();
+        
+        // Clear any existing errors for this field
+        const fieldGroup = this.destinationInput.closest('.form-group');
+        fieldGroup.classList.remove('error');
+        const existingError = fieldGroup.querySelector('.field-error');
+        if (existingError) existingError.remove();
+        
+        this.validateForm();
+        
+        if (window.mapHandler) {
+            window.mapHandler.updateDestinationLocation(place.geometry.location);
+        }
+    }
+});
             
             console.log('Autocomplete setup completed');
             
@@ -302,78 +298,65 @@ class FormHandler {
     }
 
     handleFormSubmit(e) {
-        e.preventDefault();
-        
-        const fields = [this.pickupInput, this.destinationInput, this.dateInput, this.timeInput];
-        let allValid = true;
-        
-        fields.forEach(field => {
-            if (!this.validateField(field)) {
-                allValid = false;
-            }
-        });
-        
-        if (this.pickupInput.value.trim().toLowerCase() === this.destinationInput.value.trim().toLowerCase()) {
-            this.showError('Pickup and destination cannot be the same location');
+    e.preventDefault();
+    
+    const fields = [this.pickupInput, this.destinationInput, this.dateInput, this.timeInput];
+    let allValid = true;
+    
+    fields.forEach(field => {
+        if (!this.validateField(field)) {
             allValid = false;
         }
-        
-        const hasPickupCoords = this.pickupInput.dataset.lat && this.pickupInput.dataset.lng;
-        const hasDestinationCoords = this.destinationInput.dataset.lat && this.destinationInput.dataset.lng;
-        
-        if (!hasPickupCoords) {
-            this.showError('Please select a pickup location from the suggestions');
-            allValid = false;
-        }
-        
-        if (!hasDestinationCoords) {
-            this.showError('Please select a destination from the suggestions');
-            allValid = false;
-        }
-        
-        if (!allValid) {
-            return;
-        }
-        
-        this.setLoadingState(true);
-        
-        const formData = {
-            pickup: this.pickupInput.value.trim(),
-            destination: this.destinationInput.value.trim(),
-            date: this.dateInput.value,
-            time: this.timeInput.value,
-            pickup_lat: this.pickupInput.dataset.lat || '',
-            pickup_lng: this.pickupInput.dataset.lng || '',
-            destination_lat: this.destinationInput.dataset.lat || '',
-            destination_lng: this.destinationInput.dataset.lng || ''
-        };
-        
-        console.log('Sending data:', formData);
-        
-        fetch('/estimate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log('Trip estimate received:', data);
-                window.location.href = window.location.pathname + '?estimated=true';
-            } else {
-                this.showError(data.message || 'Failed to get trip estimate');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            this.showError('Network error. Please try again.');
-        })
-        .finally(() => {
-            this.setLoadingState(false);
-        });
+    });
+    
+    if (this.pickupInput.value.trim().toLowerCase() === this.destinationInput.value.trim().toLowerCase()) {
+        this.showError('Pickup and destination cannot be the same location');
+        allValid = false;
     }
+    
+    const hasPickupCoords = this.pickupInput.dataset.lat && this.pickupInput.dataset.lng;
+    const hasDestinationCoords = this.destinationInput.dataset.lat && this.destinationInput.dataset.lng;
+    
+    if (!hasPickupCoords) {
+        this.showError('Please select a pickup location from the suggestions');
+        allValid = false;
+    }
+    
+    if (!hasDestinationCoords) {
+        this.showError('Please select a destination from the suggestions');
+        allValid = false;
+    }
+    
+    if (!allValid) {
+        return;
+    }
+    
+    // Add hidden inputs for coordinates and fix field names
+    const addHiddenInput = (name, value) => {
+        let input = this.form.querySelector(`input[name="${name}"]`);
+        if (!input) {
+            input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            this.form.appendChild(input);
+        }
+        input.value = value;
+    };
+    
+    // Add coordinates
+    addHiddenInput('pickup_lat', this.pickupInput.dataset.lat);
+    addHiddenInput('pickup_lng', this.pickupInput.dataset.lng);
+    addHiddenInput('destination_lat', this.destinationInput.dataset.lat);
+    addHiddenInput('destination_lng', this.destinationInput.dataset.lng);
+    
+    // Fix field names to match controller expectations
+    addHiddenInput('dropoff', this.destinationInput.value.trim());
+    addHiddenInput('pickupTime', `${this.dateInput.value} ${this.timeInput.value}`);
+    addHiddenInput('rideFor', 'me');
+    
+    // Submit form normally (will go to /trip route)
+    this.form.submit();
+}
     
     handleBookTrip(e) {
         e.preventDefault();

@@ -21,7 +21,7 @@
                         </div>
                         {{/if}}
 
-                        <form class="booking-form" action="/estimate" method="POST" id="tripForm">
+                        <form class="booking-form" action="/trip" method="POST" id="tripForm">
 
                             <!-- Pickup Location -->
                             <div class="form-group">
@@ -94,19 +94,16 @@
                             <div class="cta-row">
                     {{#if user}}
                         <!-- Show full-width button when user is logged in -->
-                        <a href="/trip" class="cta-link">
-                        <button type="submit" class="btn-primary w-full btn-nu">
+                        <div class="cta-row">
+                        <button type="submit" class="btn btn-primary btn-sm">
                         See prices
                         </button>
-                        </a>
+                        </div>
                     {{else}}
                         <!-- Show login text when no user is logged in -->
                         <div class="cta-row">
-                        <a href="/login" class="btn-primary w-full btn-nu">
+                        <a href="/login" class="btn btn-primary btn-sm">
                         See prices
-                        </a>
-                        <a href="/login" class="cta-link">
-                        Log in to see your recent activity
                         </a>
                         </div>
                     {{/if}}

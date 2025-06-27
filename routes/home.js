@@ -69,7 +69,7 @@ router.get('/complete-profile', (req, res) => {
 });
 
 router.get('/trip', (req, res) => {
-  homeController.trip(req, res);
+  homeController.trip(req, res); 
 });
 router.post('/trip', (req, res) => {
   homeController.tripSearch(req, res);

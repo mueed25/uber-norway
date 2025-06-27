@@ -213,70 +213,163 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ===== FORM CONTROLS ===== */
 .booking-form {
-  display: flex;
+ display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
   position: relative;
+  margin-bottom: 0; /* Remove default margin since we use gap */
 }
-
-.form-group.error .form-input {
-  border-color: var(--color-error);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-}
-
-.form-label {
-  display: flex;
-  align-items: center;
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--color-text);
-  margin-bottom: var(--spacing-xs);
-  gap: var(--spacing-sm);
-}
-
-.form-input {
-  width: 100%;
-  padding: var(--spacing-sm);
-  font-size: 16px;
-  font-family: inherit;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background-color: var(--color-bg);
-  transition: all 0.2s ease;
-  min-height: 56px;
-  box-shadow: var(--shadow-xs);
-}
-
-.form-input:focus {
-            outline: none;
-            /* FIXED: Modern focus style with subtle shadow */
-            border-color: #000;
-            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05), 
-                        0 2px 8px rgba(0, 0, 0, 0.08);
-            transform: translateY(-1px);
-        }
-
-.form-input {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .form-input:hover:not(:focus) {
-            border-color: rgba(0, 0, 0, 0.2);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-        }
-
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-lg);
+  gap: 16px; /* Reduced gap between date and time inputs */
+  margin-bottom: 16px;
+}
+
+
+.form-input {
+  width: 100%;
+  padding: 20px; /* Increased from 16px */
+  font-size: 16px;
+  font-family: inherit;
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  min-height: 64px; /* Increased from 56px to match search containers */
+  color: #1a1a1a;
+  box-sizing: border-box;
+  font-weight: 400;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); /* Subtle shadow */
+}
+
+/* Search Container for Location Inputs */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  min-height: 56px;
+}
+
+.search-container:focus-within {
+  border-color: #000000;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Location Input Icons */
+.search-container::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+/* Pickup location dot (green) */
+.search-container:has(#pickup)::before {
+  background: #10b981;
+}
+
+/* Destination location square (red) */
+.search-container:has(#destination)::before {
+  background: #ef4444;
+  border-radius: 2px;
+}
+
+/* Search Input Styling */
+.search-input {
+  flex: 1;
+  padding: 16px 16px 16px 40px; /* Left padding for icon */
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  color: #1a1a1a;
+  outline: none;
+  font-family: inherit;
+  width: 100%;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #000000;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+
+.form-input:hover:not(:focus) {
+  background: #f1f3f4;
 }
 
 .location-input {
   padding-left: var(--spacing-2xl);
+}
+
+.input-clear-btn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.input-clear-btn:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: #1a1a1a;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Form Labels */
+.form-label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+/* Error States */
+.form-group.error .search-container,
+.form-group.error .form-input {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.field-error {
+  color: #ef4444;
+  font-size: 14px;
+  margin-top: 8px;
+  font-weight: 500;
 }
 
 /* Location Icons */
@@ -352,24 +445,25 @@ h1, h2, h3, h4, h5, h6 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 8px;
+  padding: 16px 24px;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1;
   border: none;
-  border-radius: var(--radius-xl);
+  border-radius: 12px;
   cursor: pointer;
   user-select: none;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   white-space: nowrap;
-  min-height: 48px;
+  min-height: 56px;
   font-family: inherit;
   position: relative;
+  box-sizing: border-box;
 }
 
 .btn:focus {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid rgba(0, 0, 0, 0.2);
   outline-offset: 2px;
 }
 
@@ -380,62 +474,80 @@ h1, h2, h3, h4, h5, h6 {
   pointer-events: none;
 }
 
+
 .btn-primary {
-  background-color: var(--color-primary);
-  color: var(--color-bg);
+  background-color: #000000;
+  color: #ffffff;
+  border: 2px solid transparent;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
+  background-color: #1a1a1a;
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Success Button */
 .btn-success {
-  background-color: var(--color-success);
-  color: var(--color-bg);
+  background-color: #10b981;
+  color: #ffffff;
+  border: 2px solid transparent;
 }
 
 .btn-success:hover:not(:disabled) {
-  background-color: var(--color-success-hover);
+  background-color: #059669;
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
 }
 
+.btn-success:active {
+  transform: translateY(0);
+}
 .btn-outline {
-  background-color: transparent;
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
+  background-color: #ffffff;
+  color: #1a1a1a;
+  border: 2px solid #e5e7eb;
 }
 
 .btn-outline:hover:not(:disabled) {
-  background-color: rgba(0, 0, 0, 0.02);
-  border-color: var(--color-text-secondary);
+  border-color: #000000;
+  background-color: #f9fafb;
+  transform: translateY(-1px);
 }
 
 .btn-large {
-  padding: var(--spacing-md) var(--spacing-xl);
+  padding: 16px 32px;
   font-size: 18px;
   min-height: 56px;
-  border-radius: var(--radius-xl);
-  margin-top: var(--spacing-md);
+  border-radius: 12px;
+  font-weight: 600;
 }
 
-.btn-full-width {
+.btn-full-width,
+.w-full {
   width: 100%;
 }
 
 .btn-sm {
-  padding: var(--spacing-sm) var(--spacing-lg);
+  padding: 12px 20px;
   font-size: 14px;
-  min-height: 36px;
+  min-height: 40px;
+  border-radius: 10px;
 }
 
 /* Loading States */
 .btn.loading {
   color: transparent !important;
 }
-
+.btn-nu {
+  /* Custom styling for your "See prices" button */
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
 .btn.loading::after {
   content: '';
   position: absolute;
@@ -452,10 +564,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
-
 /* ===== MAP CONTAINER ===== */
 .map-panel {
   position: relative;
@@ -1094,20 +1205,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Style container around input */
-.search-container {
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 30px;
-  padding: 0.75rem 1.25rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
 
 /* When input is focused */
-.search-container:focus-within {
-  border-color: #000;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
-}
 
 /* Input field inside */
 .search-input {
@@ -1193,13 +1292,21 @@ h1, h2, h3, h4, h5, h6 {
 
 .cta-row {
   display: flex;
-  align-items: center;
-  gap: 20px;
+  flex-direction: column;
+  gap: 12px;
   margin-top: 24px;
-  flex-wrap: wrap;
-  font-family: 'Inter', sans-serif;
 }
 
+.cta-link {
+  text-decoration: none;
+  color: #6b7280;
+  font-size: 14px;
+  text-align: center;
+  transition: color 0.2s ease;
+}
+.cta-link:hover {
+  color: #000000;
+}
 /* Primary button */
 .btn-primary {
   background-color: #000;
