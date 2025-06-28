@@ -1,6 +1,5 @@
 const BasePresenter = require('./basePresenter');
 
-
 class HomePresenter extends BasePresenter {
   constructor() {
     super();

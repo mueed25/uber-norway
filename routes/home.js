@@ -79,18 +79,15 @@ router.post('/complete-profile', (req, res) => {
   homeController.completeProfile(req, res);
 });
 
-
 router.post('/add-payment', requireAuth, requireCompleteProfile, async (req, res) => {
   console.log('Add payment route hit');
   await homeController.addPayment(req, res);
 });
 
-
 router.get('/payment-success', async (req, res) => {
   console.log('Payment success route hit with session_id:', req.query.session_id);
   await homeController.paymentSuccess(req, res);
 });
-
 
 router.get('/payment-cancel', (req, res) => {
   console.log('Payment cancelled');

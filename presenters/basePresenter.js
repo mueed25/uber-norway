@@ -1,4 +1,3 @@
-
 class BasePresenter {
   constructor() {
     this.defaultContext = {

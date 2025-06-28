@@ -4,8 +4,6 @@ const HomePresenter = require('../presenters/homePresenter');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const nodemailer = require('nodemailer');
 
-
-
 class HomeController {
   constructor() {
     this.presenter = new HomePresenter();
@@ -23,214 +21,211 @@ class HomeController {
   }
 
   calculateTripPrice(distance, rideType) {
-  const pricingConfig = {
-    uberx: {
-      baseFare: 100,      
-      perKm: 1,         
-      perMinute: 2.5,    
-      minimumFare: 50    
-    },
-    comfort: {
-      baseFare: 1000,
-      perKm: 1,
-      perMinute: 3,
-      minimumFare: 65
-    },
-    uberxl: {
-      baseFare: 10000,
-      perKm: 1,
-      perMinute: 3.5,
-      minimumFare: 80
-    }
-  };
+    const pricingConfig = {
+      uberx: {
+        baseFare: 100,
+        perKm: 1,
+        perMinute: 2.5,
+        minimumFare: 50
+      },
+      comfort: {
+        baseFare: 1000,
+        perKm: 1,
+        perMinute: 3,
+        minimumFare: 65
+      },
+      uberxl: {
+        baseFare: 10000,
+        perKm: 1,
+        perMinute: 3.5,
+        minimumFare: 80
+      }
+    };
 
-  const rideKey = rideType.toLowerCase().replace('uber', 'uber');
-  const config = pricingConfig[rideKey] || pricingConfig.uberx;
-  
-  const estimatedMinutes = Math.max(5, Math.round((distance / 30) * 60));
-  
-  const distancePrice = distance * config.perKm;
-  const timePrice = estimatedMinutes * config.perMinute;
-  const totalPrice = config.baseFare + distancePrice + timePrice;
-  
-  return {
-    price: Math.max(config.minimumFare, Math.round(totalPrice)),
-    estimatedMinutes: estimatedMinutes
-  };
-}
+    const rideKey = rideType.toLowerCase().replace('uber', 'uber');
+    const config = pricingConfig[rideKey] || pricingConfig.uberx;
 
-calculateDriverETA(pickupCoords, rideType) {
-  const mockDriverLocations = {
-    uberx: [
-      { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
-      { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
-      { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 }
-    ],
-    comfort: [
-      { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
-      { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 }
-    ],
-    uberxl: [
-      { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
-      { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 }
-    ]
-  };
+    const estimatedMinutes = Math.max(5, Math.round((distance / 30) * 60));
 
-  const rideKey = rideType.toLowerCase().replace('uber', 'uber');
-  const drivers = mockDriverLocations[rideKey] || mockDriverLocations.uberx;
-  
-  let closestDistance = Infinity;
-  drivers.forEach(driverLocation => {
-    const distance = this.calculateDistance(pickupCoords, driverLocation);
-    if (distance < closestDistance) {
-      closestDistance = distance;
-    }
-  });
-  
-  const etaMinutes = Math.max(2, Math.round((closestDistance / 25) * 60));
-  
-  return etaMinutes;
-}
+    const distancePrice = distance * config.perKm;
+    const timePrice = estimatedMinutes * config.perMinute;
+    const totalPrice = config.baseFare + distancePrice + timePrice;
 
-generateDynamicRides(pickupCoords, dropoffCoords) {
-  if (!pickupCoords || !dropoffCoords) {
-    console.log('Missing coordinates for ride calculation');
-    return this.getDefaultRides(); 
+    return {
+      price: Math.max(config.minimumFare, Math.round(totalPrice)),
+      estimatedMinutes: estimatedMinutes
+    };
   }
 
-  const tripDistance = this.calculateDistance(pickupCoords, dropoffCoords);
-  console.log(`Calculated trip distance: ${tripDistance.toFixed(2)} km`);
-
-  const rideTypes = [
-    {
-      type: 'UberX',
-      category: 'Affordable, everyday rides',
-      rating: '4.8',
-      icon: 'car'
-    },
-    {
-      type: 'Comfort',
-      category: 'Newer cars with extra legroom',
-      rating: '4.9',
-      icon: 'car-luxury'
-    },
-    {
-      type: 'UberXL',
-      category: 'Larger cars for up to 6 passengers',
-      rating: '4.7',
-      icon: 'car-suv'
-    }
-  ];
-
-  return rideTypes.map(ride => {
-    const pricing = this.calculateTripPrice(tripDistance, ride.type);
-    const eta = this.calculateDriverETA(pickupCoords, ride.type);
-    
-    return {
-      id: `${ride.type.toLowerCase()}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type: ride.type,
-      category: ride.category,
-      price: `${pricing.price} kr`,
-      eta: eta,
-      arrivalTime: eta, 
-      estimatedTripTime: pricing.estimatedMinutes, 
-      rating: ride.rating,
-      icon: ride.icon,
-      distance: tripDistance.toFixed(1)
+  calculateDriverETA(pickupCoords, rideType) {
+    const mockDriverLocations = {
+      uberx: [
+        { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
+        { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
+        { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 }
+      ],
+      comfort: [
+        { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
+        { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 }
+      ],
+      uberxl: [
+        { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
+        { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 }
+      ]
     };
-  });
-}
 
-getDefaultRides() {
-  const basePrice = 50;
-  return [
-    {
-      id: 'uberx-' + Date.now(),
-      type: 'UberX',
-      category: 'Affordable, everyday rides',
-      price: `${Math.round(basePrice)} kr`,
-      eta: Math.floor(Math.random() * 8) + 2,
-      arrivalTime: Math.floor(Math.random() * 8) + 2,
-      rating: '4.8',
-      icon: 'car'
-    },
-    {
-      id: 'comfort-' + Date.now(),
-      type: 'Comfort',
-      category: 'Newer cars with extra legroom',
-      price: `${Math.round(basePrice * 1.3)} kr`,
-      eta: Math.floor(Math.random() * 6) + 3,
-      arrivalTime: Math.floor(Math.random() * 6) + 3,
-      rating: '4.9',
-      icon: 'car-luxury'
-    },
-    {
-      id: 'xl-' + Date.now(),
-      type: 'UberXL',
-      category: 'Larger cars for up to 6 passengers',
-      price: `${Math.round(basePrice * 1.6)} kr`,
-      eta: Math.floor(Math.random() * 10) + 4,
-      arrivalTime: Math.floor(Math.random() * 10) + 4,
-      rating: '4.7',
-      icon: 'car-suv'
+    const rideKey = rideType.toLowerCase().replace('uber', 'uber');
+    const drivers = mockDriverLocations[rideKey] || mockDriverLocations.uberx;
+
+    let closestDistance = Infinity;
+    drivers.forEach(driverLocation => {
+      const distance = this.calculateDistance(pickupCoords, driverLocation);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+      }
+    });
+
+    const etaMinutes = Math.max(2, Math.round((closestDistance / 25) * 60));
+
+    return etaMinutes;
+  }
+
+  generateDynamicRides(pickupCoords, dropoffCoords) {
+    if (!pickupCoords || !dropoffCoords) {
+      console.log('Missing coordinates for ride calculation');
+      return this.getDefaultRides();
     }
-  ];
-}
 
+    const tripDistance = this.calculateDistance(pickupCoords, dropoffCoords);
+    console.log(`Calculated trip distance: ${tripDistance.toFixed(2)} km`);
 
-async tripSearch(req, res) {
-  try {
-    const { pickup, dropoff, pickupTime, rideFor } = req.body;
-    
-    console.log('Trip search data:', { pickup, dropoff, pickupTime, rideFor });
-    
-    let dynamicRides = [];
-    
-    if (pickup && dropoff && pickup.trim() !== '' && dropoff.trim() !== '') {
-      const pickupCoords = this.findMockCoordinates(pickup, this.getMockLocations());
-      const dropoffCoords = this.findMockCoordinates(dropoff, this.getMockLocations());
-      
-      if (pickupCoords && dropoffCoords) {
-        console.log('Using dynamic ride calculation with real coordinates');
-        dynamicRides = this.generateDynamicRides(pickupCoords, dropoffCoords);
+    const rideTypes = [
+      {
+        type: 'UberX',
+        category: 'Affordable, everyday rides',
+        rating: '4.8',
+        icon: 'car'
+      },
+      {
+        type: 'Comfort',
+        category: 'Newer cars with extra legroom',
+        rating: '4.9',
+        icon: 'car-luxury'
+      },
+      {
+        type: 'UberXL',
+        category: 'Larger cars for up to 6 passengers',
+        rating: '4.7',
+        icon: 'car-suv'
+      }
+    ];
+
+    return rideTypes.map(ride => {
+      const pricing = this.calculateTripPrice(tripDistance, ride.type);
+      const eta = this.calculateDriverETA(pickupCoords, ride.type);
+
+      return {
+        id: `${ride.type.toLowerCase()}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        type: ride.type,
+        category: ride.category,
+        price: `${pricing.price} kr`,
+        eta: eta,
+        arrivalTime: eta,
+        estimatedTripTime: pricing.estimatedMinutes,
+        rating: ride.rating,
+        icon: ride.icon,
+        distance: tripDistance.toFixed(1)
+      };
+    });
+  }
+
+  getDefaultRides() {
+    const basePrice = 50;
+    return [
+      {
+        id: 'uberx-' + Date.now(),
+        type: 'UberX',
+        category: 'Affordable, everyday rides',
+        price: `${Math.round(basePrice)} kr`,
+        eta: Math.floor(Math.random() * 8) + 2,
+        arrivalTime: Math.floor(Math.random() * 8) + 2,
+        rating: '4.8',
+        icon: 'car'
+      },
+      {
+        id: 'comfort-' + Date.now(),
+        type: 'Comfort',
+        category: 'Newer cars with extra legroom',
+        price: `${Math.round(basePrice * 1.3)} kr`,
+        eta: Math.floor(Math.random() * 6) + 3,
+        arrivalTime: Math.floor(Math.random() * 6) + 3,
+        rating: '4.9',
+        icon: 'car-luxury'
+      },
+      {
+        id: 'xl-' + Date.now(),
+        type: 'UberXL',
+        category: 'Larger cars for up to 6 passengers',
+        price: `${Math.round(basePrice * 1.6)} kr`,
+        eta: Math.floor(Math.random() * 10) + 4,
+        arrivalTime: Math.floor(Math.random() * 10) + 4,
+        rating: '4.7',
+        icon: 'car-suv'
+      }
+    ];
+  }
+
+  async tripSearch(req, res) {
+    try {
+      const { pickup, dropoff, pickupTime, rideFor } = req.body;
+
+      console.log('Trip search data:', { pickup, dropoff, pickupTime, rideFor });
+
+      let dynamicRides = [];
+
+      if (pickup && dropoff && pickup.trim() !== '' && dropoff.trim() !== '') {
+        const pickupCoords = this.findMockCoordinates(pickup, this.getMockLocations());
+        const dropoffCoords = this.findMockCoordinates(dropoff, this.getMockLocations());
+
+        if (pickupCoords && dropoffCoords) {
+          console.log('Using dynamic ride calculation with real coordinates');
+          dynamicRides = this.generateDynamicRides(pickupCoords, dropoffCoords);
+        } else {
+          console.log('Coordinates not found, using default rides');
+          dynamicRides = this.getDefaultRides();
+        }
       } else {
-        console.log('Coordinates not found, using default rides');
+        console.log('Missing pickup/dropoff, using default rides');
         dynamicRides = this.getDefaultRides();
       }
-    } else {
-      console.log('Missing pickup/dropoff, using default rides');
-      dynamicRides = this.getDefaultRides();
-    }
-    
-    const context = this.presenter.presentHomePage();
-    res.render('ride', { 
-      ...context, 
-      user: req.oidc.user, 
-      userInformation: req.oidc,
-      isAuthenticated: req.oidc.isAuthenticated(),
-      ride: dynamicRides, 
-      pickup: pickup || '',
-      dropoff: dropoff || '',
-      pickupTime: pickupTime || 'now',
-      rideFor: rideFor || 'me'
-    });
-  } catch (error) {
-    console.error('Trip Search Error:', error);
-    const errorContext = this.presenter.presentError(error);
-    res.status(500).render('ride', errorContext);
-  }
-}
 
+      const context = this.presenter.presentHomePage();
+      res.render('ride', {
+        ...context,
+        user: req.oidc.user,
+        userInformation: req.oidc,
+        isAuthenticated: req.oidc.isAuthenticated(),
+        ride: dynamicRides,
+        pickup: pickup || '',
+        dropoff: dropoff || '',
+        pickupTime: pickupTime || 'now',
+        rideFor: rideFor || 'me'
+      });
+    } catch (error) {
+      console.error('Trip Search Error:', error);
+      const errorContext = this.presenter.presentError(error);
+      res.status(500).render('ride', errorContext);
+    }
+  }
 
   async index(req, res) {
     try {
       const context = this.presenter.presentHomePage();
-      res.render('home', { 
-        ...context, 
-        user: req.oidc.user, 
+      res.render('home', {
+        ...context,
+        user: req.oidc.user,
         userInformation: req.oidc,
         isAuthenticated: req.oidc.isAuthenticated(),
-        
       });
     } catch (error) {
       console.error('Home Controller Error:', error);
@@ -239,206 +234,205 @@ async tripSearch(req, res) {
     }
   }
 
+  async trip(req, res) {
+    try {
+      const pickup = req.query.pickup || req.body.pickup || '';
+      const dropoff = req.query.dropoff || req.body.dropoff || '';
 
-async trip(req, res) {
-  try {
-    const pickup = req.query.pickup || req.body.pickup || '';
-    const dropoff = req.query.dropoff || req.body.dropoff || '';
-    
-    let dynamicRides = [];
-    
-    if (pickup.trim() !== '' && dropoff.trim() !== '') {
-      const pickupCoords = this.findMockCoordinates(pickup, this.getMockLocations());
-      const dropoffCoords = this.findMockCoordinates(dropoff, this.getMockLocations());
-      
-      if (pickupCoords && dropoffCoords) {
-        console.log('Generating dynamic rides for trip page');
-        dynamicRides = this.generateDynamicRides(pickupCoords, dropoffCoords);
+      let dynamicRides = [];
+
+      if (pickup.trim() !== '' && dropoff.trim() !== '') {
+        const pickupCoords = this.findMockCoordinates(pickup, this.getMockLocations());
+        const dropoffCoords = this.findMockCoordinates(dropoff, this.getMockLocations());
+
+        if (pickupCoords && dropoffCoords) {
+          console.log('Generating dynamic rides for trip page');
+          dynamicRides = this.generateDynamicRides(pickupCoords, dropoffCoords);
+        } else {
+          console.log('Using default rides for trip page');
+          dynamicRides = this.getDefaultRides();
+        }
       } else {
-        console.log('Using default rides for trip page');
         dynamicRides = this.getDefaultRides();
       }
-    } else {
-      dynamicRides = this.getDefaultRides();
-    }
-    
-    const context = this.presenter.presentHomePage();
-    res.render('ride', { 
-      ...context, 
-      user: req.oidc.user, 
-      userInformation: req.oidc,
-      isAuthenticated: req.oidc.isAuthenticated(),
-      ride: dynamicRides,
-      pickup: pickup,
-      dropoff: dropoff
-    });
-  } catch (error) {
-    console.error('Trip Method Error:', error);
-    const errorContext = this.presenter.presentError(error);
-    res.status(500).render('ride', errorContext);
-  }
-}
-  
-async addPayment(req, res) {
-  try {
-    console.log('Add payment route hit');
-    console.log('Request body:', req.body);
-    console.log('Request headers:', req.headers);
 
-    if (!req.oidc.isAuthenticated()) {
-      if (req.accepts('html')) {
-        return res.oidc.login({ returnTo: req.originalUrl });
-      } else {
-        return res.status(401).json({
-          success: false,
-          message: 'Authentication required',
-          redirectTo: '/login'
-        });
-      }
-    }
-
-    let requestData;
-    if (req.headers['content-type'] === 'application/json') {
-        requestData = req.body;
-    } else {
-        requestData = req.body; 
-    }
-
-    const { rideId, rideType, ridePrice, pickup, dropoff } = req.body;
-
-    console.log('Extracted payment data:', { rideId, rideType, ridePrice, pickup, dropoff });
-
-    const missingFields = [];
-    if (!rideId || rideId.trim() === '') missingFields.push('rideId');
-    if (!rideType || rideType.trim() === '') missingFields.push('rideType');
-    if (!ridePrice || ridePrice.trim() === '') missingFields.push('ridePrice');
-    if (!pickup || pickup.trim() === '') missingFields.push('pickup location');
-    if (!dropoff || dropoff.trim() === '') missingFields.push('dropoff location');
-
-    if (missingFields.length > 0) {
-      console.log('Missing required fields:', missingFields);
-      
-      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-        return res.status(400).json({
-          success: false,
-          message: `Missing required fields: ${missingFields.join(', ')}`,
-          missingFields: missingFields,
-          receivedData: { rideId, rideType, ridePrice, pickup, dropoff }
-        });
-      }
-      
-      return res.redirect('/trip?error=missing_fields&fields=' + encodeURIComponent(missingFields.join(',')));
-    }
-
-    if (pickup.trim().toLowerCase() === dropoff.trim().toLowerCase()) {
-      const errorMsg = 'Pickup and dropoff locations must be different';
-      console.log('Validation error:', errorMsg);
-      
-      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-        return res.status(400).json({
-          success: false,
-          message: errorMsg
-        });
-      }
-      
-      return res.redirect('/trip?error=same_locations');
-    }
-
-    const userId = req.oidc.user.appUserId;
-    const userEmail = req.oidc.user.email;
-
-    const priceValue = parseFloat(ridePrice.replace(/[^\d.]/g, ''));
-    const stripeAmount = Math.round(priceValue * 100); 
-
-    console.log('Price calculation:', { ridePrice, priceValue, stripeAmount });
-
-    const pickupCoords = this.findMockCoordinates(pickup, this.getMockLocations()) || 
-                        { lat: 59.9139, lng: 10.7522 }; 
-    const destCoords = this.findMockCoordinates(dropoff, this.getMockLocations()) || 
-                      { lat: 60.1939, lng: 11.1004 }; 
-
-    const distance = this.calculateDistance(pickupCoords, destCoords);
-    const estimatedDuration = Math.round(distance * 2); 
-
-    const newTrip = new Trip({
-      pickup: {
-        address: pickup.trim(), 
-        coordinates: pickupCoords
-      },
-      destination: {
-        address: dropoff.trim(), 
-        coordinates: destCoords
-      },
-      scheduledDate: new Date(Date.now() + 24 * 60 * 60 * 1000), 
-      scheduledTime: '12:00',
-      distance: distance,
-      estimatedDuration: estimatedDuration,
-      estimatedPrice: priceValue,
-      status: 'pending',
-      paymentStatus: 'unpaid',
-      confirmationEmailSent: false,
-      ride: {
-        type: rideType,
-        price: priceValue
-      },
-      tripType: rideType.toLowerCase().includes('xl') ? 'xl' : 
-               rideType.toLowerCase().includes('comfort') ? 'premium' : 'standard',
-      userId: userId || null
-    });
-
-    const savedTrip = await newTrip.save();
-    console.log('Trip saved with actual locations:', {
-      tripId: savedTrip._id,
-      pickup: savedTrip.pickup.address,
-      destination: savedTrip.destination.address
-    });
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{
-        price_data: {
-          currency: 'nok',
-          product_data: {
-            name: `${rideType} Ride`,
-            description: `From ${pickup} to ${dropoff}`,
-          },
-          unit_amount: stripeAmount,
-        },
-        quantity: 1,
-      }],
-      mode: 'payment',
-      success_url: `${req.protocol}://${req.get('host')}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.protocol}://${req.get('host')}/trip?cancelled=true`,
-      metadata: {
-        tripId: savedTrip._id.toString(),
-        userId: userId || 'guest',
-        userEmail: userEmail,
+      const context = this.presenter.presentHomePage();
+      res.render('ride', {
+        ...context,
+        user: req.oidc.user,
+        userInformation: req.oidc,
+        isAuthenticated: req.oidc.isAuthenticated(),
+        ride: dynamicRides,
         pickup: pickup,
         dropoff: dropoff
+      });
+    } catch (error) {
+      console.error('Trip Method Error:', error);
+      const errorContext = this.presenter.presentError(error);
+      res.status(500).render('ride', errorContext);
+    }
+  }
+
+  async addPayment(req, res) {
+    try {
+      console.log('Add payment route hit');
+      console.log('Request body:', req.body);
+      console.log('Request headers:', req.headers);
+
+      if (!req.oidc.isAuthenticated()) {
+        if (req.accepts('html')) {
+          return res.oidc.login({ returnTo: req.originalUrl });
+        } else {
+          return res.status(401).json({
+            success: false,
+            message: 'Authentication required',
+            redirectTo: '/login'
+          });
+        }
       }
-    });
-    
-    savedTrip.stripeSessionId = session.id;
-    await savedTrip.save();
 
-    console.log('Stripe session created:', session.id);
-    console.log('Payment for trip:', pickup, 'to', dropoff);
+      let requestData;
+      if (req.headers['content-type'] === 'application/json') {
+        requestData = req.body;
+      } else {
+        requestData = req.body;
+      }
 
-    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-      return res.json({
-        success: true,
-        checkoutUrl: session.url,
-        sessionId: session.id,
-        tripDetails: {
+      const { rideId, rideType, ridePrice, pickup, dropoff } = req.body;
+
+      console.log('Extracted payment data:', { rideId, rideType, ridePrice, pickup, dropoff });
+
+      const missingFields = [];
+      if (!rideId || rideId.trim() === '') missingFields.push('rideId');
+      if (!rideType || rideType.trim() === '') missingFields.push('rideType');
+      if (!ridePrice || ridePrice.trim() === '') missingFields.push('ridePrice');
+      if (!pickup || pickup.trim() === '') missingFields.push('pickup location');
+      if (!dropoff || dropoff.trim() === '') missingFields.push('dropoff location');
+
+      if (missingFields.length > 0) {
+        console.log('Missing required fields:', missingFields);
+
+        if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+          return res.status(400).json({
+            success: false,
+            message: `Missing required fields: ${missingFields.join(', ')}`,
+            missingFields: missingFields,
+            receivedData: { rideId, rideType, ridePrice, pickup, dropoff }
+          });
+        }
+
+        return res.redirect('/trip?error=missing_fields&fields=' + encodeURIComponent(missingFields.join(',')));
+      }
+
+      if (pickup.trim().toLowerCase() === dropoff.trim().toLowerCase()) {
+        const errorMsg = 'Pickup and dropoff locations must be different';
+        console.log('Validation error:', errorMsg);
+
+        if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+          return res.status(400).json({
+            success: false,
+            message: errorMsg
+          });
+        }
+
+        return res.redirect('/trip?error=same_locations');
+      }
+
+      const userId = req.oidc.user.appUserId;
+      const userEmail = req.oidc.user.email;
+
+      const priceValue = parseFloat(ridePrice.replace(/[^\d.]/g, ''));
+      const stripeAmount = Math.round(priceValue * 100);
+
+      console.log('Price calculation:', { ridePrice, priceValue, stripeAmount });
+
+      const pickupCoords = this.findMockCoordinates(pickup, this.getMockLocations()) ||
+        { lat: 59.9139, lng: 10.7522 };
+      const destCoords = this.findMockCoordinates(dropoff, this.getMockLocations()) ||
+        { lat: 60.1939, lng: 11.1004 };
+
+      const distance = this.calculateDistance(pickupCoords, destCoords);
+      const estimatedDuration = Math.round(distance * 2);
+
+      const newTrip = new Trip({
+        pickup: {
+          address: pickup.trim(),
+          coordinates: pickupCoords
+        },
+        destination: {
+          address: dropoff.trim(),
+          coordinates: destCoords
+        },
+        scheduledDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        scheduledTime: '12:00',
+        distance: distance,
+        estimatedDuration: estimatedDuration,
+        estimatedPrice: priceValue,
+        status: 'pending',
+        paymentStatus: 'unpaid',
+        confirmationEmailSent: false,
+        ride: {
+          type: rideType,
+          price: priceValue
+        },
+        tripType: rideType.toLowerCase().includes('xl') ? 'xl' :
+          rideType.toLowerCase().includes('comfort') ? 'premium' : 'standard',
+        userId: userId || null
+      });
+
+      const savedTrip = await newTrip.save();
+      console.log('Trip saved with actual locations:', {
+        tripId: savedTrip._id,
+        pickup: savedTrip.pickup.address,
+        destination: savedTrip.destination.address
+      });
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [{
+          price_data: {
+            currency: 'nok',
+            product_data: {
+              name: `${rideType} Ride`,
+              description: `From ${pickup} to ${dropoff}`,
+            },
+            unit_amount: stripeAmount,
+          },
+          quantity: 1,
+        }],
+        mode: 'payment',
+        success_url: `${req.protocol}://${req.get('host')}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${req.protocol}://${req.get('host')}/trip?cancelled=true`,
+        metadata: {
+          tripId: savedTrip._id.toString(),
+          userId: userId || 'guest',
+          userEmail: userEmail,
           pickup: pickup,
-          dropoff: dropoff,
-          rideType: rideType,
-          price: ridePrice
+          dropoff: dropoff
         }
       });
-    }
 
-    res.send(`
+      savedTrip.stripeSessionId = session.id;
+      await savedTrip.save();
+
+      console.log('Stripe session created:', session.id);
+      console.log('Payment for trip:', pickup, 'to', dropoff);
+
+      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+        return res.json({
+          success: true,
+          checkoutUrl: session.url,
+          sessionId: session.id,
+          tripDetails: {
+            pickup: pickup,
+            dropoff: dropoff,
+            rideType: rideType,
+            price: ridePrice
+          }
+        });
+      }
+
+      res.send(`
       <html>
         <head>
           <title>Redirecting to payment...</title>
@@ -462,20 +456,20 @@ async addPayment(req, res) {
       </html>
     `);
 
-  } catch (error) {
-    console.error('Add Payment Error:', error);
-    
-    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-      return res.status(500).json({
-        success: false,
-        message: 'Payment initialization failed',
-        error: error.message
-      });
+    } catch (error) {
+      console.error('Add Payment Error:', error);
+
+      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+        return res.status(500).json({
+          success: false,
+          message: 'Payment initialization failed',
+          error: error.message
+        });
+      }
+
+      res.redirect('/trip?error=payment_failed&message=' + encodeURIComponent(error.message));
     }
-    
-    res.redirect('/trip?error=payment_failed&message=' + encodeURIComponent(error.message));
   }
-}
 
   async paymentSuccess(req, res) {
     try {
@@ -567,7 +561,7 @@ async addPayment(req, res) {
       };
 
       await this.transporter.sendMail(mailOptions);
-      
+
       trip.confirmationEmailSent = true;
       await trip.save();
 
@@ -666,7 +660,6 @@ async addPayment(req, res) {
     `;
   }
 
-  
   getMockLocations() {
     return {
       'åslandhellinga 345, oslo': { lat: 59.8796, lng: 10.8084 },
@@ -679,20 +672,20 @@ async addPayment(req, res) {
   }
 
   calculateDistance(coord1, coord2) {
-    const R = 6371; 
+    const R = 6371;
     const dLat = (coord2.lat - coord1.lat) * Math.PI / 180;
     const dLon = (coord2.lng - coord1.lng) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(coord1.lat * Math.PI / 180) * Math.cos(coord2.lat * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(coord1.lat * Math.PI / 180) * Math.cos(coord2.lat * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
 
   async showProfileForm(req, res) {
     console.log('showProfileForm called');
     console.log('Authenticated:', req.oidc.isAuthenticated());
-    
+
     if (!req.oidc.isAuthenticated()) {
       console.log('Not authenticated, redirecting to login');
       return res.oidc.login({ returnTo: '/complete-profile' });
@@ -700,11 +693,11 @@ async addPayment(req, res) {
 
     try {
       console.log('Rendering complete-profile form');
-      res.render('complete-profile', { 
+      res.render('complete-profile', {
         title: 'Complete Your Profile',
         user: req.oidc.user,
         isAuthenticated: true,
-        layout: 'main' 
+        layout: 'main'
       });
     } catch (error) {
       console.error('Profile Form Error:', error);
@@ -717,7 +710,7 @@ async addPayment(req, res) {
 
   async completeProfile(req, res) {
     console.log('completeProfile called with data:', req.body);
-    
+
     if (!req.oidc.isAuthenticated()) {
       console.log('Not authenticated in completeProfile');
       return res.oidc.login({ returnTo: '/complete-profile' });
@@ -725,7 +718,7 @@ async addPayment(req, res) {
 
     try {
       const { fullName, age, phone } = req.body;
-      
+
       if (!fullName || !age || !phone) {
         console.log('Missing required fields');
         return res.render('complete-profile', {
@@ -763,7 +756,7 @@ async addPayment(req, res) {
 
       const auth0Id = req.oidc.user.sub;
       console.log('Updating user profile for:', auth0Id);
-      
+
       const updatedUser = await User.findOneAndUpdate(
         { auth0Id },
         {
@@ -797,10 +790,10 @@ async addPayment(req, res) {
   async estimateTrip(req, res) {
     try {
       console.log('Received request body:', req.body);
-      
+
       const { pickup, destination, date, time } = req.body;
       const errors = [];
-      
+
       if (!pickup?.trim()) errors.push('pickup');
       if (!destination?.trim()) errors.push('destination');
       if (!date?.trim()) errors.push('date');
@@ -828,7 +821,7 @@ async addPayment(req, res) {
       });
 
       const context = this.presenter.presentTripEstimate(tripData);
-      
+
       res.json({
         success: true,
         data: context,
@@ -887,11 +880,11 @@ async addPayment(req, res) {
       'stavanger': { lat: 58.9700, lng: 5.7331 }
     };
 
-    const pickupCoords = this.findMockCoordinates(tripInput.pickup, mockLocations) || 
-                        { lat: 59.9139, lng: 10.7522 };
-    
-    const destCoords = this.findMockCoordinates(tripInput.destination, mockLocations) || 
-                      { lat: 60.1939, lng: 11.1004 };
+    const pickupCoords = this.findMockCoordinates(tripInput.pickup, mockLocations) ||
+      { lat: 59.9139, lng: 10.7522 };
+
+    const destCoords = this.findMockCoordinates(tripInput.destination, mockLocations) ||
+      { lat: 60.1939, lng: 11.1004 };
 
     return {
       pickup: { address: tripInput.pickup, coordinates: pickupCoords },
@@ -903,7 +896,7 @@ async addPayment(req, res) {
 
   findMockCoordinates(location, mockLocations) {
     const normalizedLocation = location.toLowerCase().trim();
-    
+
     if (mockLocations[normalizedLocation]) {
       return mockLocations[normalizedLocation];
     }
