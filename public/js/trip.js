@@ -50,6 +50,10 @@ class TripHandler {
     }
     
     setupEventListeners() {
+        const paymentForm = document.getElementById('trip1-payment-form');
+        if (paymentForm) {
+            paymentForm.addEventListener('submit', (e) => this.handlePaymentFormSubmit(e));
+        }
         if (this.form) {
             this.form.addEventListener('submit', (e) => this.handleSearch(e));
         }
@@ -217,6 +221,8 @@ class TripHandler {
             }
         }
     }
+
+
     
     setupRideSelection() {
         document.addEventListener('click', (e) => {
@@ -243,49 +249,87 @@ class TripHandler {
         console.log('Ride selection event delegation setup completed');
     }
 
-    updateActionButtons(ride) {
-        const selectedRide = document.getElementById('trip1-selected-ride');
-        const paymentForm = document.getElementById('trip1-payment-form');
-        const requestForm = document.getElementById('trip1-request-form');
-        
-        console.log('Updating action buttons for ride:', ride);
-        
-        if (selectedRide) {
-            selectedRide.innerHTML = `
-                <span class="trip1-selected-text">Selected: ${ride.type} - ${ride.price}</span>
-            `;
-        }
-        
-        if (paymentForm) {
-            const rideIdInput = document.getElementById('trip1-ride-id');
-            const rideTypeInput = document.getElementById('trip1-ride-type');
-            const ridePriceInput = document.getElementById('trip1-ride-price');
-            
-            if (rideIdInput) rideIdInput.value = ride.id;
-            if (rideTypeInput) rideTypeInput.value = ride.type;
-            if (ridePriceInput) ridePriceInput.value = ride.price;
-            
-            paymentForm.style.display = 'block';
-        }
-        
-        if (requestForm) {
-            const requestRideIdInput = document.getElementById('trip1-request-ride-id');
-            const requestRideTypeInput = document.getElementById('trip1-request-ride-type');
-            const requestRidePriceInput = document.getElementById('trip1-request-ride-price');
-            
-            if (requestRideIdInput) requestRideIdInput.value = ride.id;
-            if (requestRideTypeInput) requestRideTypeInput.value = ride.type;
-            if (requestRidePriceInput) requestRidePriceInput.value = ride.price;
-            
-            if (this.requestBtn) {
-                this.requestBtn.textContent = `Request ${ride.type}`;
-            }
-            
-            requestForm.style.display = 'block';
-        }
-        
-        console.log('Action buttons updated successfully');
+   updateActionButtons(ride) {
+    const selectedRide = document.getElementById('trip1-selected-ride');
+    const paymentForm = document.getElementById('trip1-payment-form');
+    const requestForm = document.getElementById('trip1-request-form');
+    
+    console.log('Updating action buttons for ride:', ride);
+    
+    if (selectedRide) {
+        selectedRide.innerHTML = `
+            <span class="trip1-selected-text">Selected: ${ride.type} - ${ride.price}</span>
+        `;
     }
+    
+    // **FIX: Get current pickup and dropoff values from the main form inputs**
+    const currentPickup = this.pickupInput ? this.pickupInput.value.trim() : '';
+    const currentDropoff = this.dropoffInput ? this.dropoffInput.value.trim() : '';
+    
+    console.log('Current form values:', { pickup: currentPickup, dropoff: currentDropoff });
+    
+    if (paymentForm) {
+        const rideIdInput = document.getElementById('trip1-ride-id');
+        const rideTypeInput = document.getElementById('trip1-ride-type');
+        const ridePriceInput = document.getElementById('trip1-ride-price');
+        
+        // **FIX: Add the missing pickup/dropoff inputs**
+        const paymentPickupInput = document.getElementById('trip1-payment-pickup');
+        const paymentDropoffInput = document.getElementById('trip1-payment-dropoff');
+        
+        if (rideIdInput) rideIdInput.value = ride.id;
+        if (rideTypeInput) rideTypeInput.value = ride.type;
+        if (ridePriceInput) ridePriceInput.value = ride.price;
+        
+        // **FIX: Populate pickup and dropoff values**
+        if (paymentPickupInput) paymentPickupInput.value = currentPickup;
+        if (paymentDropoffInput) paymentDropoffInput.value = currentDropoff;
+        
+        console.log('Payment form updated with:', {
+            rideId: ride.id,
+            rideType: ride.type,
+            ridePrice: ride.price,
+            pickup: currentPickup,
+            dropoff: currentDropoff
+        });
+        
+        paymentForm.style.display = 'block';
+    }
+    
+    if (requestForm) {
+        const requestRideIdInput = document.getElementById('trip1-request-ride-id');
+        const requestRideTypeInput = document.getElementById('trip1-request-ride-type');
+        const requestRidePriceInput = document.getElementById('trip1-request-ride-price');
+        
+        // **FIX: Add the missing pickup/dropoff inputs for request form too**
+        const requestPickupInput = document.getElementById('trip1-request-pickup');
+        const requestDropoffInput = document.getElementById('trip1-request-dropoff');
+        
+        if (requestRideIdInput) requestRideIdInput.value = ride.id;
+        if (requestRideTypeInput) requestRideTypeInput.value = ride.type;
+        if (requestRidePriceInput) requestRidePriceInput.value = ride.price;
+        
+        // **FIX: Populate pickup and dropoff values**
+        if (requestPickupInput) requestPickupInput.value = currentPickup;
+        if (requestDropoffInput) requestDropoffInput.value = currentDropoff;
+        
+        if (this.requestBtn) {
+            this.requestBtn.textContent = `Request ${ride.type}`;
+        }
+        
+        console.log('Request form updated with:', {
+            rideId: ride.id,
+            rideType: ride.type,
+            ridePrice: ride.price,
+            pickup: currentPickup,
+            dropoff: currentDropoff
+        });
+        
+        requestForm.style.display = 'block';
+    }
+    
+    console.log('Action buttons updated successfully');
+}
 
     waitForMapHandler() {
         const checkMapHandler = () => {
@@ -316,7 +360,6 @@ class TripHandler {
     
     async handleSearch(e) {
         e.preventDefault();
-        
         const formData = new FormData(this.form);
         const pickup = formData.get('pickup').trim();
         const dropoff = formData.get('dropoff').trim();
@@ -363,6 +406,7 @@ class TripHandler {
                 pickupTime: formData.get('pickupTime'),
                 rideFor: formData.get('rideFor')
             });
+            console.log('Ride data received:', rideData);
             
             this.displayRideResults(rideData);
             this.showRidePanel();
@@ -605,6 +649,60 @@ class TripHandler {
             this.mapPanel.classList.remove('trip1-map-shrunk');
         }
     }
+
+    async handlePaymentFormSubmit(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = {
+        rideId: formData.get('rideId'),
+        rideType: formData.get('rideType'),
+        ridePrice: formData.get('ridePrice'),
+        pickup: formData.get('pickup'),
+        dropoff: formData.get('dropoff')
+    };
+    
+    console.log('Payment form submission data:', data);
+    
+    // Validate data before sending
+    if (!data.pickup || !data.dropoff) {
+        this.showError('Pickup and dropoff locations are required');
+        return;
+    }
+    
+    if (!data.rideId || !data.rideType || !data.ridePrice) {
+        this.showError('Please select a ride first');
+        return;
+    }
+    
+    try {
+        this.setButtonLoading(true, this.paymentBtn);
+        
+        const response = await fetch('/add-payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.checkoutUrl) {
+            console.log('Redirecting to Stripe checkout:', result.checkoutUrl);
+            window.location.href = result.checkoutUrl;
+        } else {
+            this.showError(result.message || 'Payment initialization failed');
+        }
+        
+    } catch (error) {
+        console.error('Payment form error:', error);
+        this.showError('Failed to process payment. Please try again.');
+    } finally {
+        this.setButtonLoading(false, this.paymentBtn);
+    }
+}
     
     handleAddStop() {
         this.showNotification('Multiple stops coming soon!', 'info');
