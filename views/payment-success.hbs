@@ -1,8 +1,7 @@
-{{!-- Payment Success Page --}}
+
 <div class="ps2-main-container">
   <div class="ps2-content-wrapper">
     
-    {{!-- Success Header --}}
     <div class="ps2-success-header">
       <div class="ps2-success-icon-wrapper">
         <svg class="ps2-success-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -13,10 +12,8 @@
       <p class="ps2-subtitle">Your ride has been confirmed and booked</p>
     </div>
 
-    {{!-- Main Card Container --}}
     <div class="ps2-main-card">
       
-      {{!-- Trip Details Card --}}
       <div class="ps2-trip-card">
         <div class="ps2-card-header">
           <h2 class="ps2-card-title">
@@ -28,13 +25,11 @@
         </div>
         
         <div class="ps2-card-content">
-          {{!-- Trip ID --}}
           <div class="ps2-booking-ref">
             <p class="ps2-ref-label">Booking Reference</p>
             <p class="ps2-ref-number">{{trip.id}}</p>
           </div>
 
-          {{!-- Route Information --}}
           <div class="ps2-route-section">
             <div class="ps2-route-item">
               <div class="ps2-route-dot ps2-pickup-dot"></div>
@@ -55,7 +50,6 @@
             </div>
           </div>
 
-          {{!-- Trip Details Grid --}}
           <div class="ps2-details-grid">
             <div class="ps2-detail-item">
               <p class="ps2-detail-label">Ride Type</p>
@@ -78,7 +72,6 @@
             </div>
           </div>
 
-          {{!-- Status Badge --}}
           <div class="ps2-status-container">
             <span class="ps2-status-badge">
               <svg class="ps2-status-icon" fill="currentColor" viewBox="0 0 20 20">
@@ -90,7 +83,6 @@
         </div>
       </div>
 
-      {{!-- Next Steps Card --}}
       <div class="ps2-steps-card">
         <h3 class="ps2-steps-title">
           <svg class="ps2-steps-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,17 +118,15 @@
         </ul>
       </div>
 
-      {{!-- Action Buttons --}}
       <div class="ps2-action-buttons">
-        <a href="/" class="ps2-btn ps2-btn-primary">
+        <a href="/trip" class="ps2-btn ps2-btn-primary">
           Book Another Ride
         </a>
-        <a href="/trips" class="ps2-btn ps2-btn-secondary">
+        <a href="/account" class="ps2-btn ps2-btn-secondary">
           View All Trips
         </a>
       </div>
 
-      {{!-- Support Information --}}
       <div class="ps2-support-info">
         <p>Need help? Contact our support team at <a href="mailto:support@company.com" class="ps2-support-link">support@company.com</a></p>
         <p class="ps2-support-phone">or call <a href="tel:+1234567890" class="ps2-support-link">+47 123 456 789</a></p>
@@ -146,7 +136,6 @@
 </div>
 
 <style>
-/* Payment Success Page Styles */
 .ps2-main-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

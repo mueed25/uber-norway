@@ -212,7 +212,6 @@ class MapHandler {
             zIndex: 100
         });
         
-        // Add info window
         const infoWindow = new google.maps.InfoWindow({
             content: '<div class="map-info-window"><strong>Pickup Location</strong></div>'
         });
@@ -223,19 +222,16 @@ class MapHandler {
             this.infoWindows.push(infoWindow);
         });
         
-        // Update route if both markers exist
         this.updateRoute();
     }
     
     updateDestinationLocation(location) {
         console.log('Updating destination location:', location);
         
-        // Remove existing destination marker
         if (this.destinationMarker) {
             this.destinationMarker.setMap(null);
         }
         
-        // Add new destination marker
         this.destinationMarker = new google.maps.Marker({
             position: location,
             map: this.map,
@@ -252,7 +248,6 @@ class MapHandler {
             zIndex: 200
         });
         
-        // Add info window
         const infoWindow = new google.maps.InfoWindow({
             content: '<div class="map-info-window"><strong>Destination</strong></div>'
         });
@@ -263,7 +258,6 @@ class MapHandler {
             this.infoWindows.push(infoWindow);
         });
         
-        // Update route if both markers exist
         this.updateRoute();
     }
     
@@ -289,7 +283,6 @@ class MapHandler {
                 console.log('Route calculated successfully');
                 this.directionsRenderer.setDirections(result);
                 
-                // Fit map to show entire route with padding
                 const bounds = new google.maps.LatLngBounds();
                 bounds.extend(this.pickupMarker.getPosition());
                 bounds.extend(this.destinationMarker.getPosition());
@@ -301,12 +294,10 @@ class MapHandler {
                     left: 50
                 });
                 
-                // Update trip information
                 this.updateTripInfo(result.routes[0]);
             } else {
                 console.error('Directions request failed:', status);
                 
-                // Still try to fit bounds to show both markers
                 const bounds = new google.maps.LatLngBounds();
                 bounds.extend(this.pickupMarker.getPosition());
                 bounds.extend(this.destinationMarker.getPosition());
@@ -322,7 +313,6 @@ class MapHandler {
         
         console.log('Trip info:', { distance: distance + 'km', duration: duration + 'min' });
         
-        // Update UI if trip estimate elements exist
         const estimateDistance = document.querySelector('.estimate-distance');
         const estimateDuration = document.querySelector('.estimate-duration');
         
@@ -333,7 +323,6 @@ class MapHandler {
             estimateDuration.textContent = `~${duration} min`;
         }
         
-        // Also try alternative selectors
         const altDistanceEl = document.querySelector('[data-trip="distance"]');
         const altDurationEl = document.querySelector('[data-trip="duration"]');
         
@@ -344,14 +333,12 @@ class MapHandler {
             altDurationEl.textContent = `${duration} min`;
         }
         
-        // Store data for form submission
         this.tripData = {
             distance: distance,
             duration: duration,
             route: route
         };
         
-        // Dispatch custom event with trip data
         const tripUpdateEvent = new CustomEvent('tripUpdated', {
             detail: {
                 distance: distance,
@@ -390,7 +377,6 @@ class MapHandler {
         }
     }
     
-    // Clear marker methods
     clearPickupMarker() {
         if (this.pickupMarker) {
             this.pickupMarker.setMap(null);
@@ -414,7 +400,6 @@ class MapHandler {
             this.directionsRenderer.setDirections({routes: []});
         }
         
-        // Clear trip info
         const estimateDistance = document.querySelector('.estimate-distance');
         const estimateDuration = document.querySelector('.estimate-duration');
         const altDistanceEl = document.querySelector('[data-trip="distance"]');
@@ -436,7 +421,6 @@ class MapHandler {
         console.log('All markers cleared');
     }
     
-    // Map styling
     getMapStyles() {
         return [
             {
@@ -532,7 +516,6 @@ class MapHandler {
         ];
     }
     
-    // Public methods for external control
     recenterMap() {
         if (this.pickupMarker && this.destinationMarker) {
             const bounds = new google.maps.LatLngBounds();
@@ -566,7 +549,6 @@ class MapHandler {
         return this.tripData;
     }
     
-    // Method to handle form location updates from external sources
     handleLocationUpdate(type, location, address = '') {
         const latLng = new google.maps.LatLng(location.lat, location.lng);
         
@@ -578,9 +560,7 @@ class MapHandler {
     }
 }
 
-// Initialize map handler when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if map element exists before initializing
     if (document.getElementById('map')) {
         window.mapHandler = new MapHandler();
         console.log('MapHandler initialized and attached to window');
@@ -589,16 +569,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Handle Google Maps API load callback
 window.initMap = function() {
     console.log('Google Maps API loaded');
-    // If MapHandler hasn't been initialized yet, initialize it
     if (!window.mapHandler && document.getElementById('map')) {
         window.mapHandler = new MapHandler();
     }
 };
 
-// Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = MapHandler;
 }

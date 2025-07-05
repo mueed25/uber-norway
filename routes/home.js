@@ -67,9 +67,16 @@ router.get('/complete-profile', (req, res) => {
   console.log('Complete profile route hit');
   homeController.showProfileForm(req, res);
 });
+router.get('/check-payment-methods', (req, res) => {
+  console.log('/check-payment-methods route hit');
+  homeController.checkUserPaymentMethods(req, res);
+});
 
 router.get('/trip', (req, res) => {
   homeController.trip(req, res); 
+});
+router.get('/about-us', (req, res) => {
+  homeController.about(req, res); 
 });
 router.post('/trip', (req, res) => {
   homeController.tripSearch(req, res);
@@ -84,8 +91,14 @@ router.post('/add-payment', requireAuth, requireCompleteProfile, async (req, res
   console.log('Add payment route hit');
   await homeController.addPayment(req, res);
 });
-
-
+router.get('/payment-setup-success', async (req, res) => {
+  console.log('Payment setup success route hit');
+  await homeController.paymentSetupSuccess(req, res);
+});
+router.get('/account', async (req, res) => {
+  console.log('account hit');
+  await homeController.account(req, res);
+});
 router.get('/payment-success', async (req, res) => {
   console.log('Payment success route hit with session_id:', req.query.session_id);
   await homeController.paymentSuccess(req, res);

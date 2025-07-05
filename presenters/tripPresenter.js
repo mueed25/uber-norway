@@ -145,3 +145,114 @@ class TripPresenter extends basePresenter {
 }
 
 module.exports = new TripPresenter();
+
+async sendConfirmationEmail(trip, userEmail) {
+    try {
+      const emailTemplate = this.generateEmailTemplate(trip);
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: userEmail,
+        subject: `Ride Confirmed - ${trip.ride.type} from ${trip.pickup.address}`,
+        html: emailTemplate
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      
+      trip.confirmationEmailSent = true;
+      await trip.save();
+
+      console.log('Confirmation email sent to:', userEmail);
+    } catch (error) {
+      console.error('Email sending error:', error);
+    }
+  }
+
+ generateEmailTemplate(trip) {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>Ride Confirmation</title>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #000; color: white; padding: 20px; text-align: center; }
+            .content { padding: 20px; background: #f9f9f9; }
+            .trip-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+            .detail-row { display: flex; justify-content: space-between; margin: 10px 0; padding: 10px 0; border-bottom: 1px solid #eee; }
+            .price { font-size: 24px; font-weight: bold; color: #000; text-align: center; margin: 20px 0; }
+            .footer { text-align: center; padding: 20px; color: #666; font-size: 14px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🚗 Ride Confirmed!</h1>
+            </div>
+            
+            <div class="content">
+                <h2>Your ${trip.ride.type} ride has been confirmed</h2>
+                <p>Thank you for your booking! Here are your trip details:</p>
+                
+                <div class="trip-details">
+                    <div class="detail-row">
+                        <strong>Trip ID:</strong>
+                        <span>${trip._id}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Ride Type:</strong>
+                        <span>${trip.ride.type}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Pickup Location:</strong>
+                        <span>${trip.pickup.address}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Destination:</strong>
+                        <span>${trip.destination.address}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Scheduled Date:</strong>
+                        <span>${trip.formattedDate}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Scheduled Time:</strong>
+                        <span>${trip.formattedTime}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Estimated Duration:</strong>
+                        <span>${trip.estimatedDuration} minutes</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Distance:</strong>
+                        <span>${trip.distance.toFixed(1)} km</span>
+                    </div>
+                </div>
+                
+                <div class="price">
+                    Total Paid: ${trip.ride.price} kr
+                </div>
+                
+                <p><strong>Status:</strong> ${trip.status.charAt(0).toUpperCase() + trip.status.slice(1)}</p>
+                
+                <h3>What's Next?</h3>
+                <ul>
+                    <li>Your driver will be assigned shortly before your scheduled time</li>
+                    <li>You'll receive SMS notifications about your driver's arrival</li>
+                    <li>Make sure to be ready at your pickup location</li>
+                </ul>
+                
+                <p>If you need to make any changes or have questions, please contact our support team.</p>
+            </div>
+            
+            <div class="footer">
+                <p>Thank you for choosing our service!</p>
+                <p>This is an automated email. Please do not reply to this message.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+  }

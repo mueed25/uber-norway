@@ -1677,6 +1677,7 @@ h1, h2, h3, h4, h5, h6 {
 .trip1-ride-price {
   text-align: right;
   flex-shrink: 0;
+  padding-right:20px;
 }
 
 .trip1-price-amount {
@@ -1862,7 +1863,7 @@ h1, h2, h3, h4, h5, h6 {
   .trip1-left-panel {
     width: 100%;
     height: auto;
-    min-height: 50vh;
+    min-height: 60vh;
     border-right: none;
     border-bottom: 1px solid #e9ecef;
   }
@@ -1891,68 +1892,89 @@ h1, h2, h3, h4, h5, h6 {
     height: 40vh;
   }
   
-  .trip1-form-wrapper {
+  .trip1-ride-card {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .trip1-car-icon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .trip1-ride-type {
+    font-size: 16px;
+  }
+  
+  .trip1-price-amount {
+    font-size: 18px;
+  }
+  .trip1-ride-price{
+    margin-right:20px;
+  }
+  .trip1-rating {
+    padding: 3px 6px;
+  }
+  
+  .trip1-rating-stars,
+  .trip1-rating-value {
+    font-size: 11px;
+  }
+  
+  .trip1-datetime-group {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .trip1-schedule-header {
+    padding: 16px 20px;
+  }
+  
+  .trip1-schedule-content {
     padding: 20px;
   }
   
-  .trip1-title {
-    font-size: 24px;
-    margin-bottom: 24px;
-  }
-  
-  .trip1-action-buttons {
-    position: static;
-    margin-top: 24px;
-    padding-top: 0;
-    border-top: none;
-    background: transparent;
-    margin-left: 0;
-    margin-right: 0;
-    padding-left: 0;
-    padding-right: 0;
-    padding-bottom: 0;
+  .trip1-schedule-header h4 {
+    font-size: 16px;
   }
 }
 
 @media (max-width: 480px) {
-  .trip1-form-wrapper {
-    padding: 16px;
-  }
-  
-  .trip1-middle-panel {
-    padding: 16px;
-  }
-  
-  .trip1-title {
-    font-size: 22px;
-  }
-  
   .trip1-ride-card {
-    padding: 16px;
-    flex-direction: column;
-    text-align: center;
+    padding: 14px;
     gap: 12px;
   }
   
-  .trip1-ride-info {
-    text-align: center;
+  .trip1-car-icon {
+    width: 44px;
+    height: 44px;
   }
   
-  .trip1-ride-header {
-    justify-content: center;
+  .trip1-ride-type {
+    font-size: 15px;
+  }
+  
+  .trip1-price-amount {
+    font-size: 17px;
+  }
+  
+  .trip1-ride-details {
     flex-direction: column;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 4px;
   }
   
-  .trip1-action-buttons {
-    gap: 8px;
+  .trip1-eta {
+    font-size: 12px;
+    padding: 2px 6px;
   }
   
-  .trip1-action-buttons {
-    padding-left: 16px;
-    padding-right: 16px;
-    margin-left: -16px;
-    margin-right: -16px;
+  .trip1-arrival {
+    font-size: 12px;
+  }
+  
+  .trip1-ride-category {
+    font-size: 12px;
   }
 }
 
@@ -1992,29 +2014,24 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(-2px);
 }
 
-.trip1-ride-card.trip1-ride-active::before {
-  content: '';
+
+.trip1-ride-card.trip1-ride-active .trip1-price-amount::after {
+  content: '✓';
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 20px;
-  height: 20px;
-  background: #000000;
+  top: 40%;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background:black;
+  color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.trip1-ride-card.trip1-ride-active::after {
-  content: '✓';
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  color: white;
   font-size: 12px;
   font-weight: bold;
-  z-index: 1;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Selected Ride Display */
@@ -2067,4 +2084,368 @@ h1, h2, h3, h4, h5, h6 {
 
 .trip1-input-group {
   position: relative;
+}
+
+/* Enhanced Dropdown Styling */
+.trip1-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.trip1-select {
+  width: 100%;
+  padding: 16px 16px 16px 0;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  color: #1a1a1a;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  padding-right: 40px;
+}
+
+.trip1-select:focus {
+  outline: none;
+}
+
+.trip1-select-wrapper::after {
+  content: '';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid #6b7280;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.trip1-input-group:focus-within .trip1-select-wrapper::after {
+  border-top-color: #000000;
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.trip1-select-wrapper::after {
+  content: '';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #6b7280;
+  pointer-events: none;
+}
+
+/* Schedule Card Styling */
+.trip1-schedule-card {
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 0;
+  margin-top: 16px;
+  overflow: hidden;
+  animation: slideDown 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.trip1-schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  color: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.trip1-schedule-header h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+.trip1-schedule-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.trip1-schedule-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.trip1-schedule-content {
+  padding: 24px;
+  background: #fafbfc;
+}
+
+.trip1-datetime-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.trip1-date-input,
+.trip1-time-input {
+  display: flex;
+  flex-direction: column;
+}
+
+.trip1-date-input label,
+.trip1-time-input label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  letter-spacing: -0.1px;
+}
+
+.trip1-datetime-input {
+  padding: 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  background: white;
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.trip1-datetime-input:focus {
+  outline: none;
+  border-color: #000000;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.trip1-schedule-confirm {
+  width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: -0.1px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.trip1-schedule-confirm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.trip1-schedule-confirm:active {
+  transform: translateY(0);
+}
+
+.trip1-schedule-confirm:active {
+  transform: translateY(1px);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .trip1-datetime-group {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .trip1-schedule-header {
+    padding: 12px 16px;
+  }
+  
+  .trip1-schedule-content {
+    padding: 16px;
+  }
+}
+
+/* Footer Connect Section - Clean Professional Style */
+
+/* About Us Page Styles */
+.about5-main {
+    min-height: calc(100vh - 200px);
+    padding: 0;
+}
+
+.about5-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.about5-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.about5-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin: 0;
+    font-weight: 300;
+}
+
+.about5-content {
+    padding: 4rem 0;
+    background: #f8f9fa;
+}
+
+.about5-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.about5-text-block {
+    background: white;
+    padding: 3rem 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: 1px solid rgba(0,0,0,0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+.about5-text-block:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.about5-text-block:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+}
+
+.about5-heading {
+    color: #1a1a1a;
+    font-size: 1.75rem;
+    margin: 0 0 1.5rem 0;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+}
+
+.about5-paragraph {
+    color: #4a4a4a;
+    line-height: 1.8;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+.about5-values-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.about5-value-item {
+    color: #4a4a4a;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    position: relative;
+    padding-left: 2rem;
+    font-size: 1.05rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.about5-value-item:before {
+    content: "●";
+    position: absolute;
+    left: 0;
+    color: #667eea;
+    font-weight: bold;
+    font-size: 1.2rem;
+    top: 1rem;
+}
+
+.about5-value-item:hover {
+    color: #1a1a1a;
+    padding-left: 2.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .footer5-contact-section {
+        border-left: none;
+        border-top: 2px solid #e0e0e0;
+        padding-left: 0;
+        padding-top: 1.5rem;
+        margin-top: 1rem;
+    }
+    
+    .about5-title {
+        font-size: 2rem;
+    }
+    
+    .about5-hero {
+        padding: 2rem 0;
+    }
+    
+    .about5-content {
+        padding: 2rem 0;
+    }
+    
+    .about5-grid {
+        gap: 1.5rem;
+    }
+    
+    .about5-text-block {
+        padding: 2.5rem 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .about5-heading {
+        font-size: 1.5rem;
+    }
+    
+    .about5-paragraph {
+        font-size: 1rem;
+    }
 }

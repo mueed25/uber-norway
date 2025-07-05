@@ -103,7 +103,6 @@ class FormHandler {
             this.pickupAutocomplete = new google.maps.places.Autocomplete(this.pickupInput, options);
             this.destinationAutocomplete = new google.maps.places.Autocomplete(this.destinationInput, options);
             
-           // Fix for autocomplete place_changed listeners
 this.pickupAutocomplete.addListener('place_changed', () => {
     const place = this.pickupAutocomplete.getPlace();
     console.log('Pickup place selected:', place);
@@ -112,7 +111,6 @@ this.pickupAutocomplete.addListener('place_changed', () => {
         this.pickupInput.dataset.lat = place.geometry.location.lat();
         this.pickupInput.dataset.lng = place.geometry.location.lng();
         
-        // Clear any existing errors for this field
         const fieldGroup = this.pickupInput.closest('.form-group');
         fieldGroup.classList.remove('error');
         const existingError = fieldGroup.querySelector('.field-error');
@@ -134,7 +132,6 @@ this.pickupAutocomplete.addListener('place_changed', () => {
         this.destinationInput.dataset.lat = place.geometry.location.lat();
         this.destinationInput.dataset.lng = place.geometry.location.lng();
         
-        // Clear any existing errors for this field
         const fieldGroup = this.destinationInput.closest('.form-group');
         fieldGroup.classList.remove('error');
         const existingError = fieldGroup.querySelector('.field-error');
@@ -195,7 +192,6 @@ this.pickupAutocomplete.addListener('place_changed', () => {
         const value = field.value.trim();
         const fieldGroup = field.closest('.form-group');
         
-        // Remove existing error states
         fieldGroup.classList.remove('error');
         const existingError = fieldGroup.querySelector('.field-error');
         if (existingError) {
@@ -331,7 +327,6 @@ this.pickupAutocomplete.addListener('place_changed', () => {
         return;
     }
     
-    // Add hidden inputs for coordinates and fix field names
     const addHiddenInput = (name, value) => {
         let input = this.form.querySelector(`input[name="${name}"]`);
         if (!input) {
@@ -343,18 +338,15 @@ this.pickupAutocomplete.addListener('place_changed', () => {
         input.value = value;
     };
     
-    // Add coordinates
     addHiddenInput('pickup_lat', this.pickupInput.dataset.lat);
     addHiddenInput('pickup_lng', this.pickupInput.dataset.lng);
     addHiddenInput('destination_lat', this.destinationInput.dataset.lat);
     addHiddenInput('destination_lng', this.destinationInput.dataset.lng);
     
-    // Fix field names to match controller expectations
     addHiddenInput('dropoff', this.destinationInput.value.trim());
     addHiddenInput('pickupTime', `${this.dateInput.value} ${this.timeInput.value}`);
     addHiddenInput('rideFor', 'me');
     
-    // Submit form normally (will go to /trip route)
     this.form.submit();
 }
     

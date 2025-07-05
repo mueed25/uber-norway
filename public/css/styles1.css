@@ -1,0 +1,161 @@
+/* Footer Connect Section Styles */
+.footer5-contact-section {
+    border-left: 2px solid #e0e0e0;
+    padding-left: 1.5rem;
+}
+
+.footer5-whatsapp-link {
+    color: #25d366 !important;
+    transition: all 0.3s ease;
+}
+
+.footer5-whatsapp-link:hover {
+    color: #128c7e !important;
+    transform: translateX(3px);
+}
+
+.footer5-email-link {
+    color: #0066cc !important;
+    transition: all 0.3s ease;
+}
+
+.footer5-email-link:hover {
+    color: #004499 !important;
+    transform: translateX(3px);
+}
+
+.footer5-terms-link {
+    color: #666 !important;
+    transition: all 0.3s ease;
+}
+
+.footer5-terms-link:hover {
+    color: #333 !important;
+    transform: translateX(3px);
+}
+
+/* About Us Page Styles */
+.about5-main {
+    min-height: calc(100vh - 200px);
+    padding: 0;
+}
+
+.about5-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.about5-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.about5-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin: 0;
+    font-weight: 300;
+}
+
+.about5-content {
+    padding: 4rem 0;
+    background: #f8f9fa;
+}
+
+.about5-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.about5-text-block {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about5-text-block:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+.about5-heading {
+    color: #333;
+    font-size: 1.5rem;
+    margin: 0 0 1rem 0;
+    font-weight: 600;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 0.5rem;
+}
+
+.about5-paragraph {
+    color: #666;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.about5-values-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.about5-value-item {
+    color: #666;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.about5-value-item:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #667eea;
+    font-weight: bold;
+}
+
+.about5-value-item:last-child {
+    border-bottom: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .footer5-contact-section {
+        border-left: none;
+        border-top: 2px solid #e0e0e0;
+        padding-left: 0;
+        padding-top: 1.5rem;
+        margin-top: 1rem;
+    }
+    
+    .about5-title {
+        font-size: 2rem;
+    }
+    
+    .about5-hero {
+        padding: 2rem 0;
+    }
+    
+    .about5-content {
+        padding: 2rem 0;
+    }
+    
+    .about5-grid {
+        gap: 1.5rem;
+    }
+    
+    .about5-text-block {
+        padding: 1.5rem;
+    }
+}

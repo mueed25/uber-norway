@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Go anywhere with Uber Clone - Book your ride easily">
+    <meta name="keywords" content="uber, ride, taxi, booking, transportation">
+    <title>{{title}}</title>
+    
+    <!-- Preconnect to Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style1.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body class="{{bodyClass}}">
+    <!-- Header -->
+    {{> header}}
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        {{{body}}}
+    </main>
+    
+    <!-- Footer -->
+    {{> footer}}
+    
+    <!-- Google Maps API with direct API key -->
+    <script>
+        // Initialize map config
+        window.mapConfig = {
+            center: { lat: 59.9139, lng: 10.7522 },
+            zoom: 12
+        };AIzaSyAkXSl74uaSI6PUOsiytrrynYIexdAS5i
+        window.googleMapsApiKey = 'k';
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAkXSl74uaSI6PUOsiytrrynYIexdAS5ik&libraries=places&callback=initMap"></script>
+    
+    <!-- Main JavaScript -->
+    <script src="/js/main.js"></script>
+    <script src="/js/map.js"></script>
+    <script src="/js/forms.js"></script>
+    <script src="/js/trip.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const btn = document.getElementById("hamburgerBtn");
+            const menu = document.getElementById("mobileMenu");
+
+            console.log("Script loaded. Button:", btn, "Menu:", menu);
+
+            if (btn && menu) {
+                btn.addEventListener("click", function () {
+                    console.log("Hamburger clicked!");
+                    menu.classList.toggle("show");
+                });
+            } else {
+                console.warn("Hamburger button or menu not found!");
+            }
+        });
+    </script>
+
+
+
+
+</body>
+</html>

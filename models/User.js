@@ -28,9 +28,38 @@ const UserSchema = new mongoose.Schema({
   profileComplete: {
     type: Boolean,
     default: false
+  },
+  // New payment-related fields
+  stripeCustomerId: {
+    type: String,
+    default: null
+  },
+  defaultPaymentMethodId: {
+    type: String,
+    default: null
+  },
+  savedPaymentMethods: [{
+    paymentMethodId: String,
+    cardBrand: String,
+    cardLast4: String,
+    isDefault: Boolean,
+    createdAt: Date
+  }],
+  hasPaymentMethod: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
 });
+
+UserSchema.methods.hasValidPaymentMethod = function() {
+  return this.stripeCustomerId && this.defaultPaymentMethodId && this.hasPaymentMethod;
+};
+
+UserSchema.methods.getDefaultPaymentMethodInfo = function() {
+  const defaultMethod = this.savedPaymentMethods.find(method => method.isDefault);
+  return defaultMethod || null;
+};
 
 module.exports = mongoose.model('User', UserSchema);

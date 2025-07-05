@@ -74,6 +74,9 @@ confirmationEmailSent: {
   type: Boolean,
   default: false
 },
+stripePaymentIntentId: {
+  type: String,
+},
 ride: {
   type: {
     type: String, // e.g. 'standard'

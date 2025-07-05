@@ -159,11 +159,9 @@ class HomePresenter extends BasePresenter {
    * @returns {String} - 
    */
   getCurrentTime() {
-    const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  }
+  const now = new Date(Date.now() + 600000); // +10 minutes in milliseconds
+  return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+}
 
   /**
    * Estimate trip duration based on distance

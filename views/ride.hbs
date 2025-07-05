@@ -1,12 +1,9 @@
-{{!-- trip.hbs - Trip Request Page Template --}}
 <div class="trip1-container">
-  {{!-- Left Panel - Form Area --}}
   <div class="trip1-left-panel">
     <div class="trip1-form-wrapper">
       <h2 class="trip1-title">Find a trip</h2>
       
       <form id="trip1-search-form" class="trip1-form" action="/trip" method="POST">
-        {{!-- Pick-up Location --}}
         <div class="trip1-input-group">
           <div class="trip1-input-icon">
             <div class="trip1-pickup-dot"></div>
@@ -23,7 +20,6 @@
           />
         </div>
 
-        {{!-- Drop-off Location --}}
         <div class="trip1-input-group">
           <div class="trip1-input-icon">
             <div class="trip1-dropoff-square"></div>
@@ -41,7 +37,6 @@
           <button type="button" class="trip1-add-stop">+</button>
         </div>
 
-        {{!-- Time Picker --}}
         <div class="trip1-input-group">
           <div class="trip1-input-icon">
             <svg class="trip1-clock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -49,27 +44,35 @@
               <polyline points="12,6 12,12 16,14" stroke="currentColor" stroke-width="2"/>
             </svg>
           </div>
-          <select class="trip1-select" name="pickupTime">
-            <option value="now" {{#if (eq pickupTime 'now')}}selected{{/if}}>Pick up now</option>
-            <option value="scheduled" {{#if (eq pickupTime 'scheduled')}}selected{{/if}}>Schedule for later</option>
-          </select>
-        </div>
-
-        {{!-- For Me Dropdown --}}
-        <div class="trip1-input-group">
-          <div class="trip1-input-icon">
-            <svg class="trip1-user-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/>
-              <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
-            </svg>
+          <div class="trip1-select-wrapper">
+            <select class="trip1-select" name="pickupTime" id="trip1-pickup-time">
+              <option value="now" {{#if (eq pickupTime 'now')}}selected{{/if}}>Pick up now</option>
+              <option value="scheduled" {{#if (eq pickupTime 'scheduled')}}selected{{/if}}>Schedule for later</option>
+            </select>
           </div>
-          <select class="trip1-select" name="rideFor">
-            <option value="me" {{#if (eq rideFor 'me')}}selected{{/if}}>For me</option>
-            <option value="someone" {{#if (eq rideFor 'someone')}}selected{{/if}}>For someone else</option>
-          </select>
         </div>
 
-        {{!-- Search Button --}}
+        <!-- Schedule Later Card -->
+        <div class="trip1-schedule-card" id="trip1-schedule-card" style="display: none;">
+          <div class="trip1-schedule-header">
+            <h4>Schedule your ride</h4>
+            <button type="button" class="trip1-schedule-close" id="trip1-schedule-close">×</button>
+          </div>
+          <div class="trip1-schedule-content">
+            <div class="trip1-datetime-group">
+              <div class="trip1-date-input">
+                <label>Date</label>
+                <input type="date" name="scheduleDate" id="trip1-schedule-date" class="trip1-datetime-input">
+              </div>
+              <div class="trip1-time-input">
+                <label>Time</label>
+                <input type="time" name="scheduleTime" id="trip1-schedule-time" class="trip1-datetime-input">
+              </div>
+            </div>
+            <button type="button" class="trip1-schedule-confirm" id="trip1-schedule-confirm">Confirm Schedule</button>
+          </div>
+        </div>
+
         <button type="submit" class="trip1-search-btn" id="trip1-search-btn">
           <span class="trip1-btn-text">Search</span>
           <div class="trip1-loading-spinner" style="display: none;">
@@ -80,7 +83,6 @@
     </div>
   </div>
 
-  {{!-- Middle Panel - Ride Results (Dynamic) --}}
   <div class="trip1-middle-panel {{#unless ride}}trip1-hidden{{/unless}}" id="trip1-middle-panel">
     {{#if ride}}
       <div class="trip1-ride-wrapper">
@@ -89,39 +91,37 @@
 
         {{#each ride}}
           <div class="trip1-ride-card" data-ride-id="{{id}}" data-ride-type="{{type}}" data-ride-price="{{price}}">
-            <!-- Car Icon -->
             <div class="trip1-car-icon">
-              <svg width="40" height="24" viewBox="0 0 40 24" fill="none">
-                <path d="M8 18C9.10457 18 10 17.1046 10 16C10 14.8954 9.10457 14 8 14C6.89543 14 6 14.8954 6 16C6 17.1046 6.89543 18 8 18Z" fill="currentColor"/>
-                <path d="M32 18C33.1046 18 34 17.1046 34 16C34 14.8954 33.1046 14 32 14C30.8954 14 30 14.8954 30 16C30 17.1046 30.8954 18 32 18Z" fill="currentColor"/>
-                <path d="M2 4L6 4L8 14L32 14L36 4L38 4C38.5523 4 39 4.44772 39 5C39 5.55228 38.5523 6 38 6L37 6L33 16L7 16L5 6L2 6C1.44772 6 1 5.55228 1 5C1 4.44772 1.44772 4 2 4Z" fill="currentColor"/>
-              </svg>
+              <svg width="40" height="24" viewBox="0 0 64 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 20C6 18.8954 6.89543 18 8 18C9.10457 18 10 18.8954 10 20C10 21.1046 9.10457 22 8 22C6.89543 22 6 21.1046 6 20Z" fill="currentColor"/>
+              <path d="M54 20C54 18.8954 54.8954 18 56 18C57.1046 18 58 18.8954 58 20C58 21.1046 57.1046 22 56 22C54.8954 22 54 21.1046 54 20Z" fill="currentColor"/>
+              <path d="M12 10L16 6H48L52 10H60C61.1046 10 62 10.8954 62 12V20C62 20.5523 61.5523 21 61 21H60C60 23.2091 58.2091 25 56 25C53.7909 25 52 23.2091 52 21H12C12 23.2091 10.2091 25 8 25C5.79086 25 4 23.2091 4 21H3C2.44772 21 2 20.5523 2 20V12C2 10.8954 2.89543 10 4 10H12Z" fill="currentColor"/>
+              <path d="M17 10H47L44 8H20L17 10Z" fill="currentColor"/>
+            </svg>
+
             </div>
 
-            <!-- Ride Info -->
             <div class="trip1-ride-info">
               <div class="trip1-ride-header">
                 <span class="trip1-ride-type">{{type}}</span>
+                
+              </div>
+              <div class="trip1-ride-details">
+                <span class="trip1-eta">{{arrivalTime}} mins away</span>
                 <div class="trip1-rating">
                   <span class="trip1-rating-stars">★</span>
                   <span class="trip1-rating-value">{{rating}}</span>
                 </div>
               </div>
-              <div class="trip1-ride-details">
-                <span class="trip1-eta">{{eta}} mins away</span>
-                <span class="trip1-arrival">{{arrivalTime}}</span>
-              </div>
               <p class="trip1-ride-category">{{category}}</p>
             </div>
 
-            <!-- Price -->
             <div class="trip1-ride-price">
               <span class="trip1-price-amount">{{price}}</span>
             </div>
           </div>
         {{/each}}
 
-        {{!-- Centralized Action Buttons --}}
         <div class="trip1-action-buttons">
           <div class="trip1-selected-ride" id="trip1-selected-ride">
             <span class="trip1-selected-text">Select a ride to continue</span>
@@ -132,9 +132,10 @@
             <input type="hidden" name="rideId" id="trip1-ride-id">
             <input type="hidden" name="rideType" id="trip1-ride-type">
             <input type="hidden" name="ridePrice" id="trip1-ride-price">
-            {{!-- Don't set initial values here, let JavaScript handle it --}}
             <input type="hidden" name="pickup" id="trip1-payment-pickup" value="">
             <input type="hidden" name="dropoff" id="trip1-payment-dropoff" value="">
+            <input type="hidden" name="scheduleDate" id="trip1-payment-schedule-date" value="">
+            <input type="hidden" name="scheduleTime" id="trip1-payment-schedule-time" value="">
             <button type="submit" class="trip1-payment-btn" id="trip1-payment-btn">
               <svg class="trip1-payment-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
                 <rect x="1" y="4" width="22" height="16" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
@@ -144,13 +145,14 @@
             </button>
           </form>
           
-          <form id="trip1-request-form" action="/request-ride" method="POST" style="display: none;">
+          <form id="trip1-request-form" action="" method="POST" style="display: none;">
             <input type="hidden" name="rideId" id="trip1-request-ride-id">
             <input type="hidden" name="rideType" id="trip1-request-ride-type">
             <input type="hidden" name="ridePrice" id="trip1-request-ride-price">
-            {{!-- Don't set initial values here, let JavaScript handle it --}}
             <input type="hidden" name="pickup" id="trip1-request-pickup" value="">
             <input type="hidden" name="dropoff" id="trip1-request-dropoff" value="">
+            <input type="hidden" name="scheduleDate" id="trip1-request-schedule-date" value="">
+            <input type="hidden" name="scheduleTime" id="trip1-request-schedule-time" value="">
             <button type="submit" class="trip1-request-btn" id="trip1-request-btn">
               Request Ride
             </button>
@@ -158,13 +160,12 @@
           </div>
         </div>
       </div>
+
     {{/if}}
   </div>
 
-  {{!-- Right Panel - Map --}}
   <div class="trip1-right-panel {{#if ride}}trip1-map-shrunk{{/if}}" id="trip1-map-panel">
     <div id="trip1-map-container" class="trip1-map">
-      {{!-- Map will be rendered here by external map service --}}
       <div class="trip1-map-placeholder">
         <div id="map" class="map-container"></div>
       </div>
@@ -172,11 +173,9 @@
   </div>
 </div>
 
-{{!-- Loading Overlay --}}
 <div class="trip1-loading-overlay" id="trip1-loading-overlay" style="display: none;">
   <div class="trip1-loading-content">
     <div class="trip1-big-spinner"></div>
     <p>Finding the best rides for you...</p>
   </div>
 </div>
-
