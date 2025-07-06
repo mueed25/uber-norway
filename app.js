@@ -126,6 +126,7 @@ app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(async (req, res, next) => {
+
   if (req.oidc.isAuthenticated() && req.oidc.user && req.oidc.user.sub) {
     try {
       const user = await User.findOne({ auth0Id: req.oidc.user.sub });
@@ -148,6 +149,8 @@ app.use(async (req, res, next) => {
       console.error('User sync error:', error);
     }
   }
+  
+  res.locals.google_public_key = process.env.GOOGLE_PUBLIC_API_KEY;
   next();
 });
 
@@ -172,6 +175,7 @@ const requireCompleteProfile = (req, res, next) => {
 
 app.use('/', homeRoutes);
 app.use('/trip', requireCompleteProfile, tripRoutes);
+
 
 app.use((req, res) => {
   res.status(404).render('error', {

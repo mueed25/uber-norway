@@ -4,8 +4,6 @@ const HomePresenter = require('../presenters/homePresenter');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const nodemailer = require('nodemailer');
 
-
-
 class HomeController {
   constructor() {
     this.presenter = new HomePresenter();
@@ -23,58 +21,58 @@ class HomeController {
   }
 
   calculateTripPrice(distance, rideType) {
-  const pricingConfig = {
-    uberx: {
-      baseFare: 100,      
-      perKm: 1,         
-      perMinute: 2.5,    
-      minimumFare: 50    
-    },
-    comfort: {
-      baseFare: 1000,
-      perKm: 1,
-      perMinute: 3,
-      minimumFare: 65
-    },
-    uberxl: {
-      baseFare: 10000,
-      perKm: 1,
-      perMinute: 3.5,
-      minimumFare: 80
-    }
-  };
+    const pricingConfig = {
+      uberx: {
+        baseFare: 100,
+        perKm: 1,
+        perMinute: 2.5,
+        minimumFare: 50
+      },
+      comfort: {
+        baseFare: 1000,
+        perKm: 1,
+        perMinute: 3,
+        minimumFare: 65
+      },
+      uberxl: {
+        baseFare: 10000,
+        perKm: 1,
+        perMinute: 3.5,
+        minimumFare: 80
+      }
+    };
 
-  const rideKey = rideType.toLowerCase().replace('uber', 'uber');
-  const config = pricingConfig[rideKey] || pricingConfig.uberx;
-  
-  const estimatedMinutes = Math.max(5, Math.round((distance / 30) * 60));
-  
-  const distancePrice = distance * config.perKm;
-  const timePrice = estimatedMinutes * config.perMinute;
-  const totalPrice = config.baseFare + distancePrice + timePrice;
-  
-  return {
-    price: Math.max(config.minimumFare, Math.round(totalPrice)),
-    estimatedMinutes: estimatedMinutes
-  };
-}
+    const rideKey = rideType.toLowerCase().replace('uber', 'uber');
+    const config = pricingConfig[rideKey] || pricingConfig.uberx;
 
-calculateDriverETA(pickupCoords, rideType) {
-  const mockDriverLocations = {
-    uberx: [
-      { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
-      { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
-      { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 }
-    ],
-    comfort: [
-      { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
-      { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 }
-    ],
-    uberxl: [
-      { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
-      { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 }
-    ]
-  };
+    const estimatedMinutes = Math.max(5, Math.round((distance / 30) * 60));
+
+    const distancePrice = distance * config.perKm;
+    const timePrice = estimatedMinutes * config.perMinute;
+    const totalPrice = config.baseFare + distancePrice + timePrice;
+
+    return {
+      price: Math.max(config.minimumFare, Math.round(totalPrice)),
+      estimatedMinutes: estimatedMinutes
+    };
+  }
+
+  calculateDriverETA(pickupCoords, rideType) {
+    const mockDriverLocations = {
+      uberx: [
+        { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
+        { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
+        { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 }
+      ],
+      comfort: [
+        { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
+        { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 }
+      ],
+      uberxl: [
+        { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 },
+        { lat: 59.9139 + (Math.random() - 0.5) * 0.02, lng: 10.7522 + (Math.random() - 0.5) * 0.02 }
+      ]
+    };
 
   const rideKey = rideType.toLowerCase().replace('uber', 'uber');
   const drivers = mockDriverLocations[rideKey] || mockDriverLocations.uberx;
@@ -91,138 +89,55 @@ calculateDriverETA(pickupCoords, rideType) {
   
   return etaMinutes;
 }
-// Add this method to your HomeController class
 
-async account(req, res) {
-  try {
-    // Check if user is authenticated
-    if (!req.oidc.isAuthenticated()) {
-      return res.oidc.login({ returnTo: '/account' });
-    }
-
-    const userId = req.oidc.user.sub;
-    const user = await User.findOne({ auth0Id: userId });
-    
-    // Get user's trips
-    const trips = await Trip.find({ userId: user?._id })
-      .sort({ createdAt: -1 })
-      .limit(50); // Limit to last 50 trips
-
-    // Check payment method status
-    let hasPaymentMethod = false;
-    let paymentInfo = null;
-    
-    if (user?.hasValidPaymentMethod()) {
-      try {
-        const paymentMethod = await stripe.paymentMethods.retrieve(user.defaultPaymentMethodId);
-        if (paymentMethod && paymentMethod.customer === user.stripeCustomerId) {
-          hasPaymentMethod = true;
-          paymentInfo = {
-            cardBrand: paymentMethod.card.brand.toUpperCase(),
-            cardLast4: paymentMethod.card.last4
-          };
-        }
-      } catch (stripeError) {
-        console.log('Payment method verification failed:', stripeError.message);
-        // Clean up invalid payment method
-        if (user) {
-          user.hasPaymentMethod = false;
-          user.defaultPaymentMethodId = null;
-          await user.save();
-        }
-      }
-    }
-
-    // Format trips for display
-    const formattedTrips = trips.map(trip => ({
-      ...trip.toObject(),
-      formattedDate: trip.scheduledDate ? 
-        new Date(trip.scheduledDate).toLocaleDateString('en-US', {
-          weekday: 'short',
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
-        }) : 'N/A',
-      formattedTime: trip.scheduledTime || 'N/A',
-      distance: trip.distance ? trip.distance.toFixed(1) : '0.0'
-    }));
-
-    const context = this.presenter.presentHomePage();
-    res.render('account', {
-      ...context,
-      title: 'My Account',
-      user: req.oidc.user,
-      userProfile: user,
-      userInformation: req.oidc,
-      isAuthenticated: req.oidc.isAuthenticated(),
-      rides: formattedTrips,
-      hasPaymentMethod,
-      paymentInfo
-    });
-
-  } catch (error) {
-    console.error('Account Controller Error:', error);
-    const errorContext = this.presenter.presentError(error);
-    res.status(500).render('account', {
-      ...errorContext,
-      title: 'Account Error',
-      user: req.oidc.user,
-      userInformation: req.oidc,
-      isAuthenticated: req.oidc.isAuthenticated(),
-      rides: [],
-      hasPaymentMethod: false,
-      paymentInfo: null
-    });
-  }
-}
 generateDynamicRides(pickupCoords, dropoffCoords) {
   if (!pickupCoords || !dropoffCoords) {
     console.log('Missing coordinates for ride calculation');
     return this.getDefaultRides(); 
   }
 
-  const tripDistance = this.calculateDistance(pickupCoords, dropoffCoords);
-  console.log(`Calculated trip distance: ${tripDistance.toFixed(2)} km`);
+    const tripDistance = this.calculateDistance(pickupCoords, dropoffCoords);
+    console.log(`Calculated trip distance: ${tripDistance.toFixed(2)} km`);
 
-  const rideTypes = [
-    {
-      type: 'UberX',
-      category: 'Affordable, everyday rides',
-      rating: '4.8',
-      icon: 'car'
-    },
-    {
-      type: 'Comfort',
-      category: 'Newer cars with extra legroom',
-      rating: '4.9',
-      icon: 'car-luxury'
-    },
-    {
-      type: 'UberXL',
-      category: 'Larger cars for up to 6 passengers',
-      rating: '4.7',
-      icon: 'car-suv'
-    }
-  ];
+    const rideTypes = [
+      {
+        type: 'UberX',
+        category: 'Affordable, everyday rides',
+        rating: '4.8',
+        icon: 'car'
+      },
+      {
+        type: 'Comfort',
+        category: 'Newer cars with extra legroom',
+        rating: '4.9',
+        icon: 'car-luxury'
+      },
+      {
+        type: 'UberXL',
+        category: 'Larger cars for up to 6 passengers',
+        rating: '4.7',
+        icon: 'car-suv'
+      }
+    ];
 
-  return rideTypes.map(ride => {
-    const pricing = this.calculateTripPrice(tripDistance, ride.type);
-    const eta = this.calculateDriverETA(pickupCoords, ride.type);
-    
-    return {
-      id: `${ride.type.toLowerCase()}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type: ride.type,
-      category: ride.category,
-      price: `${pricing.price} kr`,
-      eta: eta,
-      arrivalTime: eta, 
-      estimatedTripTime: pricing.estimatedMinutes, 
-      rating: ride.rating,
-      icon: ride.icon,
-      distance: tripDistance.toFixed(1)
-    };
-  });
-}
+    return rideTypes.map(ride => {
+      const pricing = this.calculateTripPrice(tripDistance, ride.type);
+      const eta = this.calculateDriverETA(pickupCoords, ride.type);
+
+      return {
+        id: `${ride.type.toLowerCase()}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        type: ride.type,
+        category: ride.category,
+        price: `${pricing.price} kr`,
+        eta: eta,
+        arrivalTime: eta,
+        estimatedTripTime: pricing.estimatedMinutes,
+        rating: ride.rating,
+        icon: ride.icon,
+        distance: tripDistance.toFixed(1)
+      };
+    });
+  }
 
 getDefaultRides() {
   const basePrice = 50;
@@ -256,114 +171,62 @@ getDefaultRides() {
       arrivalTime: Math.floor(Math.random() * 10) + 4,
       rating: '4.7',
       icon: 'car-suv'
-    },
-    {
-      id: 'xl-' + Date.now(),
-      type: 'UberXL',
-      category: 'Larger cars for up to 6 passengers',
-      price: `${Math.round(basePrice * 1.6)} kr`,
-      eta: Math.floor(Math.random() * 10) + 4,
-      arrivalTime: Math.floor(Math.random() * 10) + 4,
-      rating: '4.7',
-      icon: 'car-suv'
     }
   ];
 }
 
-async checkUserPaymentMethods(req, res) {
-  try {
-    if (!req.oidc.isAuthenticated()) {
-      return res.json({ hasPaymentMethod: false });
-    }
 
-    const userId = req.oidc.user.sub;
-    const user = await User.findOne({ auth0Id: userId });
-    
-    if (!user) {
-      return res.json({ hasPaymentMethod: false });
-    }
+  async tripSearch(req, res) {
+    try {
+      const { pickup, dropoff, pickupTime, rideFor } = req.body;
 
-    // Verify payment method is still valid in Stripe
-    if (user.hasValidPaymentMethod()) {
-      try {
-        const paymentMethod = await stripe.paymentMethods.retrieve(user.defaultPaymentMethodId);
-        if (paymentMethod && paymentMethod.customer === user.stripeCustomerId) {
-          const paymentInfo = user.getDefaultPaymentMethodInfo();
-          return res.json({
-            hasPaymentMethod: true,
-            paymentInfo: paymentInfo
-          });
+      console.log('Trip search data:', { pickup, dropoff, pickupTime, rideFor });
+
+      let dynamicRides = [];
+
+      if (pickup && dropoff && pickup.trim() !== '' && dropoff.trim() !== '') {
+        const pickupCoords = this.findMockCoordinates(pickup, this.getMockLocations());
+        const dropoffCoords = this.findMockCoordinates(dropoff, this.getMockLocations());
+
+        if (pickupCoords && dropoffCoords) {
+          console.log('Using dynamic ride calculation with real coordinates');
+          dynamicRides = this.generateDynamicRides(pickupCoords, dropoffCoords);
+        } else {
+          console.log('Coordinates not found, using default rides');
+          dynamicRides = this.getDefaultRides();
         }
-      } catch (stripeError) {
-        console.log('Stripe payment method verification failed:', stripeError.message);
-        // Clean up invalid payment method
-        user.hasPaymentMethod = false;
-        user.defaultPaymentMethodId = null;
-        user.savedPaymentMethods = user.savedPaymentMethods.filter(pm => pm.paymentMethodId !== user.defaultPaymentMethodId);
-        await user.save();
-      }
-    }
-    
-    res.json({ hasPaymentMethod: false });
-  } catch (error) {
-    console.error('Check Payment Methods Error:', error);
-    res.status(500).json({ hasPaymentMethod: false, error: error.message });
-  }
-}
-
-async tripSearch(req, res) {
-  try {
-    const { pickup, dropoff, pickupTime, rideFor } = req.body;
-    
-    console.log('Trip search data:', { pickup, dropoff, pickupTime, rideFor });
-    
-    let dynamicRides = [];
-    
-    if (pickup && dropoff && pickup.trim() !== '' && dropoff.trim() !== '') {
-      const pickupCoords = this.findMockCoordinates(pickup, this.getMockLocations());
-      const dropoffCoords = this.findMockCoordinates(dropoff, this.getMockLocations());
-      
-      if (pickupCoords && dropoffCoords) {
-        console.log('Using dynamic ride calculation with real coordinates');
-        dynamicRides = this.generateDynamicRides(pickupCoords, dropoffCoords);
       } else {
-        console.log('Coordinates not found, using default rides');
+        console.log('Missing pickup/dropoff, using default rides');
         dynamicRides = this.getDefaultRides();
       }
-    } else {
-      console.log('Missing pickup/dropoff, using default rides');
-      dynamicRides = this.getDefaultRides();
-    }
-    
-    const context = this.presenter.presentHomePage();
-    res.render('ride', { 
-      ...context, 
-      user: req.oidc.user, 
-      userInformation: req.oidc,
-      isAuthenticated: req.oidc.isAuthenticated(),
-      ride: dynamicRides, 
-      pickup: pickup || '',
-      dropoff: dropoff || '',
-      pickupTime: pickupTime || 'now',
-      rideFor: rideFor || 'me'
-    });
-  } catch (error) {
-    console.error('Trip Search Error:', error);
-    const errorContext = this.presenter.presentError(error);
-    res.status(500).render('ride', errorContext);
-  }
-}
 
+      const context = this.presenter.presentHomePage();
+      res.render('ride', {
+        ...context,
+        user: req.oidc.user,
+        userInformation: req.oidc,
+        isAuthenticated: req.oidc.isAuthenticated(),
+        ride: dynamicRides,
+        pickup: pickup || '',
+        dropoff: dropoff || '',
+        pickupTime: pickupTime || 'now',
+        rideFor: rideFor || 'me'
+      });
+    } catch (error) {
+      console.error('Trip Search Error:', error);
+      const errorContext = this.presenter.presentError(error);
+      res.status(500).render('ride', errorContext);
+    }
+  }
 
   async index(req, res) {
     try {
       const context = this.presenter.presentHomePage();
-      res.render('home', { 
-        ...context, 
-        user: req.oidc.user, 
+      res.render('home', {
+        ...context,
+        user: req.oidc.user,
         userInformation: req.oidc,
         isAuthenticated: req.oidc.isAuthenticated(),
-        
       });
     } catch (error) {
       console.error('Home Controller Error:', error);
@@ -431,7 +294,9 @@ async trip(req, res) {
 async addPayment(req, res) {
   try {
     console.log('Add payment route hit');
-    
+    console.log('Request body:', req.body);
+    console.log('Request headers:', req.headers);
+
     if (!req.oidc.isAuthenticated()) {
       if (req.accepts('html')) {
         return res.oidc.login({ returnTo: req.originalUrl });
@@ -444,246 +309,196 @@ async addPayment(req, res) {
       }
     }
 
-    const { rideId, rideType, ridePrice, pickup, dropoff, scheduleDate, scheduleTime, useExistingCard } = req.body;
-    
-    // Validation
+    let requestData;
+    if (req.headers['content-type'] === 'application/json') {
+        requestData = req.body;
+    } else {
+        requestData = req.body; 
+    }
+
+    const { rideId, rideType, ridePrice, pickup, dropoff } = req.body;
+
+    console.log('Extracted payment data:', { rideId, rideType, ridePrice, pickup, dropoff });
+
     const missingFields = [];
-    if (!rideId?.trim()) missingFields.push('rideId');
-    if (!rideType?.trim()) missingFields.push('rideType');
-    if (!ridePrice?.toString().trim()) missingFields.push('ridePrice');
-    if (!pickup?.trim()) missingFields.push('pickup location');
-    if (!dropoff?.trim()) missingFields.push('dropoff location');
+    if (!rideId || rideId.trim() === '') missingFields.push('rideId');
+    if (!rideType || rideType.trim() === '') missingFields.push('rideType');
+    if (!ridePrice || ridePrice.trim() === '') missingFields.push('ridePrice');
+    if (!pickup || pickup.trim() === '') missingFields.push('pickup location');
+    if (!dropoff || dropoff.trim() === '') missingFields.push('dropoff location');
 
     if (missingFields.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: `Missing required fields: ${missingFields.join(', ')}`,
-        missingFields
-      });
+      console.log('Missing required fields:', missingFields);
+      
+      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+        return res.status(400).json({
+          success: false,
+          message: `Missing required fields: ${missingFields.join(', ')}`,
+          missingFields: missingFields,
+          receivedData: { rideId, rideType, ridePrice, pickup, dropoff }
+        });
+      }
+      
+      return res.redirect('/trip?error=missing_fields&fields=' + encodeURIComponent(missingFields.join(',')));
     }
 
-    const userId = req.oidc.user.sub;
+    if (pickup.trim().toLowerCase() === dropoff.trim().toLowerCase()) {
+      const errorMsg = 'Pickup and dropoff locations must be different';
+      console.log('Validation error:', errorMsg);
+      
+      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+        return res.status(400).json({
+          success: false,
+          message: errorMsg
+        });
+      }
+      
+      return res.redirect('/trip?error=same_locations');
+    }
+
+    const userId = req.oidc.user.appUserId;
     const userEmail = req.oidc.user.email;
-    const user = await User.findOne({ auth0Id: userId });
-    
-    const priceValue = parseFloat(ridePrice.toString().replace(/[^\d.]/g, ''));
-    const stripeAmount = Math.round(priceValue * 100);
 
-    // Create trip first
-    const pickupCoords = this.findMockCoordinates(pickup, this.getMockLocations()) || { lat: 59.9139, lng: 10.7522 };
-    const destCoords = this.findMockCoordinates(dropoff, this.getMockLocations()) || { lat: 60.1939, lng: 11.1004 };
+    const priceValue = parseFloat(ridePrice.replace(/[^\d.]/g, ''));
+    const stripeAmount = Math.round(priceValue * 100); 
+
+    console.log('Price calculation:', { ridePrice, priceValue, stripeAmount });
+
+    const pickupCoords = this.findMockCoordinates(pickup, this.getMockLocations()) || 
+                        { lat: 59.9139, lng: 10.7522 }; 
+    const destCoords = this.findMockCoordinates(dropoff, this.getMockLocations()) || 
+                      { lat: 60.1939, lng: 11.1004 }; 
+
     const distance = this.calculateDistance(pickupCoords, destCoords);
-    const estimatedDuration = Math.round(distance * 2);
-
-    let scheduledDateTime;
-    let isScheduled = false;
-    
-    if (scheduleDate && scheduleTime) {
-      scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`);
-      isScheduled = true;
-    } else {
-      scheduledDateTime = new Date(Date.now() + 15 * 60 * 1000);
-    }
+    const estimatedDuration = Math.round(distance * 2); 
 
     const newTrip = new Trip({
-      pickup: { address: pickup.trim(), coordinates: pickupCoords },
-      destination: { address: dropoff.trim(), coordinates: destCoords },
-      scheduledDate: scheduledDateTime,
-      scheduledTime: scheduleTime || scheduledDateTime.toTimeString().slice(0, 5),
-      distance,
-      estimatedDuration,
+      pickup: {
+        address: pickup.trim(), 
+        coordinates: pickupCoords
+      },
+      destination: {
+        address: dropoff.trim(), 
+        coordinates: destCoords
+      },
+      scheduledDate: new Date(Date.now() + 24 * 60 * 60 * 1000), 
+      scheduledTime: '12:00',
+      distance: distance,
+      estimatedDuration: estimatedDuration,
       estimatedPrice: priceValue,
       status: 'pending',
       paymentStatus: 'unpaid',
       confirmationEmailSent: false,
-      ride: { type: rideType, price: priceValue },
+      ride: {
+        type: rideType,
+        price: priceValue
+      },
       tripType: rideType.toLowerCase().includes('xl') ? 'xl' : 
                rideType.toLowerCase().includes('comfort') ? 'premium' : 'standard',
-      userId: user?._id || null,
-      isScheduled
+      userId: userId || null
     });
 
     const savedTrip = await newTrip.save();
+    console.log('Trip saved with actual locations:', {
+      tripId: savedTrip._id,
+      pickup: savedTrip.pickup.address,
+      destination: savedTrip.destination.address
+    });
 
-    // Check if user wants to use existing card and has valid one
-    if (useExistingCard === 'true' && user?.hasValidPaymentMethod()) {
-      console.log('Processing payment with saved card');
-      return await this.processExistingCardPayment(savedTrip, user, req, res);
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'nok',
+          product_data: {
+            name: `${rideType} Ride`,
+            description: `From ${pickup} to ${dropoff}`,
+          },
+          unit_amount: stripeAmount,
+        },
+        quantity: 1,
+      }],
+      mode: 'payment',
+      success_url: `${req.protocol}://${req.get('host')}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.protocol}://${req.get('host')}/trip?cancelled=true`,
+      metadata: {
+        tripId: savedTrip._id.toString(),
+        userId: userId || 'guest',
+        userEmail: userEmail,
+        pickup: pickup,
+        dropoff: dropoff
+      }
+    });
+    
+    savedTrip.stripeSessionId = session.id;
+    await savedTrip.save();
+
+    console.log('Stripe session created:', session.id);
+    console.log('Payment for trip:', pickup, 'to', dropoff);
+
+    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+      return res.json({
+        success: true,
+        checkoutUrl: session.url,
+        sessionId: session.id,
+        tripDetails: {
+          pickup: pickup,
+          dropoff: dropoff,
+          rideType: rideType,
+          price: ridePrice
+        }
+      });
     }
 
-    // Create new payment method flow with setup mode
-    console.log('Creating new payment method with setup mode');
-    return await this.createNewPaymentMethodSetup(savedTrip, user, userEmail, stripeAmount, req, res);
+    res.send(`
+      <html>
+        <head>
+          <title>Redirecting to payment...</title>
+        </head>
+        <body>
+          <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+            <h2>Processing your ${rideType} ride</h2>
+            <p><strong>From:</strong> ${pickup}</p>
+            <p><strong>To:</strong> ${dropoff}</p>
+            <p><strong>Price:</strong> ${ridePrice}</p>
+            <p>Redirecting to payment...</p>
+            <p>If you are not redirected automatically, <a href="${session.url}" id="manual-link">click here</a>.</p>
+          </div>
+          <script>
+            console.log('Redirecting to Stripe:', '${session.url}');
+            setTimeout(() => {
+              window.location.href = '${session.url}';
+            }, 1000);
+          </script>
+        </body>
+      </html>
+    `);
 
   } catch (error) {
     console.error('Add Payment Error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Payment initialization failed',
-      error: error.message
-    });
-  }
-}
-
-async processExistingCardPayment(trip, user, req, res) {
-  try {
-    const stripeAmount = Math.round(trip.estimatedPrice * 100);
     
-    const paymentMethod = await stripe.paymentMethods.retrieve(user.defaultPaymentMethodId);
-    if (!paymentMethod || paymentMethod.customer !== user.stripeCustomerId) {
-      throw new Error('Payment method no longer valid');
-    }
-    
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: stripeAmount,
-      currency: 'nok',
-      customer: user.stripeCustomerId,
-      payment_method: user.defaultPaymentMethodId,
-      confirm: true,
-      return_url: `${req.protocol}://${req.get('host')}/payment-success`,
-      metadata: {
-        tripId: trip._id.toString(),
-        userId: user.auth0Id,
-        userEmail: req.oidc.user.email,
-        pickup: trip.pickup.address,
-        dropoff: trip.destination.address,
-      }
-    });
-
-    console.log('Payment Intent Created:', paymentIntent.id, 'Status:', paymentIntent.status);
-
-    if (paymentIntent.status === 'succeeded') {
-      trip.status = 'confirmed';
-      trip.paymentStatus = 'paid';
-      trip.stripeSessionId = paymentIntent.id;
-      trip.stripePaymentIntentId = paymentIntent.id; 
-      await trip.save();
-
-      await this.sendConfirmationEmail(trip, req.oidc.user.email);
-
-      return res.json({
-        success: true,
-        message: 'Payment successful',
-        paymentStatus: 'completed',
-        tripId: trip._id.toString(),
-        paymentIntentId: paymentIntent.id,
-        redirectTo: `/payment-success?payment_intent=${paymentIntent.id}&trip_id=${trip._id}`
-      });
-    } else if (paymentIntent.status === 'requires_action') {
-      return res.json({
+    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+      return res.status(500).json({
         success: false,
-        requiresAction: true,
-        paymentIntentId: paymentIntent.id,
-        clientSecret: paymentIntent.client_secret,
-        tripId: trip._id.toString()
-      });
-    } else {
-      console.log('Payment requires confirmation or failed:', paymentIntent.status);
-      return res.json({
-        success: false,
-        message: 'Payment requires confirmation',
-        paymentStatus: paymentIntent.status,
-        paymentIntentId: paymentIntent.id,
-        clientSecret: paymentIntent.client_secret
-      });
-    }
-  } catch (error) {
-    console.error('Existing Card Payment Error:', error);
-    
-    if (error.code === 'card_declined') {
-      return res.json({
-        success: false,
-        cardDeclined: true,
-        message: 'Your card was declined. Please try a different payment method.',
-        fallbackToNewCard: true
-      });
-    } else if (error.code === 'expired_card') {
-      return res.json({
-        success: false,
-        cardExpired: true,
-        message: 'Your saved card has expired. Please add a new payment method.',
-        fallbackToNewCard: true
-      });
-    } else if (error.message.includes('no longer valid')) {
-      return res.json({
-        success: false,
-        cardInvalid: true,
-        message: 'Your saved card is no longer valid. Please add a new payment method.',
-        fallbackToNewCard: true
-      });
-    } else {
-      return res.json({
-        success: false,
-        message: 'Payment processing failed. Please try again.',
+        message: 'Payment initialization failed',
         error: error.message
       });
     }
-  }
-}
-
-async createNewPaymentMethodSetup(trip, user, userEmail, stripeAmount, req, res) {
-  try {
-   
-    let customerId = user?.stripeCustomerId;
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: userEmail,
-        name: req.oidc.user.name || user?.fullName || '',
-        metadata: { userId: user?.auth0Id || 'guest' }
-      });
-      customerId = customer.id;
-      
-      if (user) {
-        user.stripeCustomerId = customerId;
-        await user.save();
-      }
-    }
-
-   
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'setup',
-      customer: customerId,
-      setup_intent_data: {
-        metadata: {
-          tripId: trip._id.toString(),
-          userId: user?.auth0Id || 'guest',
-          userEmail: userEmail,
-          pickup: trip.pickup.address,
-          dropoff: trip.destination.address,
-          amount: stripeAmount.toString(),
-          saveAndCharge: 'true'
-        }
-      },
-      success_url: `${req.protocol}://${req.get('host')}/payment-setup-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.protocol}://${req.get('host')}/trip?cancelled=true`
-    });
-
-    trip.stripeSessionId = session.id;
-    await trip.save();
-
-    return res.json({
-      success: true,
-      checkoutUrl: session.url,
-      sessionId: session.id,
-      isSetupMode: true
-    });
-  } catch (error) {
-    console.error('Setup Payment Method Error:', error);
-    throw error;
-  }
-}
-
-async paymentSetupSuccess(req, res) {
-  try {
-    const { session_id } = req.query;
     
-    if (!session_id) {
-      return res.status(400).render('error', {
-        title: 'Setup Error',
-        error: { message: 'No session ID provided' }
-      });
-    }
+    res.redirect('/trip?error=payment_failed&message=' + encodeURIComponent(error.message));
+  }
+}
+
+  async paymentSuccess(req, res) {
+    try {
+      const { session_id } = req.query;
+
+      if (!session_id) {
+        return res.status(400).render('error', {
+          title: 'Payment Error',
+          error: { message: 'No session ID provided' }
+        });
+      }
 
     console.log('Processing setup success for session:', session_id);
 
@@ -944,7 +759,7 @@ async paymentSuccess(req, res) {
       };
 
       await this.transporter.sendMail(mailOptions);
-      
+
       trip.confirmationEmailSent = true;
       await trip.save();
 
@@ -1043,7 +858,6 @@ async paymentSuccess(req, res) {
     `;
   }
 
-  
   getMockLocations() {
     return {
       'åslandhellinga 345, oslo': { lat: 59.8796, lng: 10.8084 },
@@ -1056,20 +870,20 @@ async paymentSuccess(req, res) {
   }
 
   calculateDistance(coord1, coord2) {
-    const R = 6371; 
+    const R = 6371;
     const dLat = (coord2.lat - coord1.lat) * Math.PI / 180;
     const dLon = (coord2.lng - coord1.lng) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(coord1.lat * Math.PI / 180) * Math.cos(coord2.lat * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(coord1.lat * Math.PI / 180) * Math.cos(coord2.lat * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
 
   async showProfileForm(req, res) {
     console.log('showProfileForm called');
     console.log('Authenticated:', req.oidc.isAuthenticated());
-    
+
     if (!req.oidc.isAuthenticated()) {
       console.log('Not authenticated, redirecting to login');
       return res.oidc.login({ returnTo: '/complete-profile' });
@@ -1077,11 +891,11 @@ async paymentSuccess(req, res) {
 
     try {
       console.log('Rendering complete-profile form');
-      res.render('complete-profile', { 
+      res.render('complete-profile', {
         title: 'Complete Your Profile',
         user: req.oidc.user,
         isAuthenticated: true,
-        layout: 'main' 
+        layout: 'main'
       });
     } catch (error) {
       console.error('Profile Form Error:', error);
@@ -1094,7 +908,7 @@ async paymentSuccess(req, res) {
 
   async completeProfile(req, res) {
     console.log('completeProfile called with data:', req.body);
-    
+
     if (!req.oidc.isAuthenticated()) {
       console.log('Not authenticated in completeProfile');
       return res.oidc.login({ returnTo: '/complete-profile' });
@@ -1102,7 +916,7 @@ async paymentSuccess(req, res) {
 
     try {
       const { fullName, age, phone } = req.body;
-      
+
       if (!fullName || !age || !phone) {
         console.log('Missing required fields');
         return res.render('complete-profile', {
@@ -1140,7 +954,7 @@ async paymentSuccess(req, res) {
 
       const auth0Id = req.oidc.user.sub;
       console.log('Updating user profile for:', auth0Id);
-      
+
       const updatedUser = await User.findOneAndUpdate(
         { auth0Id },
         {
@@ -1174,10 +988,10 @@ async paymentSuccess(req, res) {
   async estimateTrip(req, res) {
     try {
       console.log('Received request body:', req.body);
-      
+
       const { pickup, destination, date, time } = req.body;
       const errors = [];
-      
+
       if (!pickup?.trim()) errors.push('pickup');
       if (!destination?.trim()) errors.push('destination');
       if (!date?.trim()) errors.push('date');
@@ -1205,7 +1019,7 @@ async paymentSuccess(req, res) {
       });
 
       const context = this.presenter.presentTripEstimate(tripData);
-      
+
       res.json({
         success: true,
         data: context,
@@ -1264,11 +1078,11 @@ async paymentSuccess(req, res) {
       'stavanger': { lat: 58.9700, lng: 5.7331 }
     };
 
-    const pickupCoords = this.findMockCoordinates(tripInput.pickup, mockLocations) || 
-                        { lat: 59.9139, lng: 10.7522 };
-    
-    const destCoords = this.findMockCoordinates(tripInput.destination, mockLocations) || 
-                      { lat: 60.1939, lng: 11.1004 };
+    const pickupCoords = this.findMockCoordinates(tripInput.pickup, mockLocations) ||
+      { lat: 59.9139, lng: 10.7522 };
+
+    const destCoords = this.findMockCoordinates(tripInput.destination, mockLocations) ||
+      { lat: 60.1939, lng: 11.1004 };
 
     return {
       pickup: { address: tripInput.pickup, coordinates: pickupCoords },
@@ -1280,7 +1094,7 @@ async paymentSuccess(req, res) {
 
   findMockCoordinates(location, mockLocations) {
     const normalizedLocation = location.toLowerCase().trim();
-    
+
     if (mockLocations[normalizedLocation]) {
       return mockLocations[normalizedLocation];
     }
