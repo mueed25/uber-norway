@@ -308,8 +308,8 @@ class MapHandler {
     
     updateTripInfo(route) {
         const leg = route.legs[0];
-        const distance = leg.distance.value / 1000; // Convert to km
-        const duration = Math.round(leg.duration.value / 60); // Convert to minutes
+        const distance = leg.distance.value / 1000; 
+        const duration = Math.round(leg.duration.value / 60); 
         
         console.log('Trip info:', { distance: distance + 'km', duration: duration + 'min' });
         

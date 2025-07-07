@@ -13,7 +13,6 @@ const connectDatabase = async () => {
   }
 };
 
-// Handle connection events
 mongoose.connection.on('connected', () => {
   console.log('🔗 Mongoose connected to MongoDB');
 });

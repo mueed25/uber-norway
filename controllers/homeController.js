@@ -91,11 +91,9 @@ calculateDriverETA(pickupCoords, rideType) {
   
   return etaMinutes;
 }
-// Add this method to your HomeController class
 
 async account(req, res) {
   try {
-    // Check if user is authenticated
     if (!req.oidc.isAuthenticated()) {
       return res.oidc.login({ returnTo: '/account' });
     }
@@ -103,12 +101,10 @@ async account(req, res) {
     const userId = req.oidc.user.sub;
     const user = await User.findOne({ auth0Id: userId });
     
-    // Get user's trips
     const trips = await Trip.find({ userId: user?._id })
       .sort({ createdAt: -1 })
-      .limit(50); // Limit to last 50 trips
+      .limit(50); 
 
-    // Check payment method status
     let hasPaymentMethod = false;
     let paymentInfo = null;
     
@@ -124,7 +120,7 @@ async account(req, res) {
         }
       } catch (stripeError) {
         console.log('Payment method verification failed:', stripeError.message);
-        // Clean up invalid payment method
+        
         if (user) {
           user.hasPaymentMethod = false;
           user.defaultPaymentMethodId = null;
@@ -133,7 +129,6 @@ async account(req, res) {
       }
     }
 
-    // Format trips for display
     const formattedTrips = trips.map(trip => ({
       ...trip.toObject(),
       formattedDate: trip.scheduledDate ? 
@@ -283,7 +278,6 @@ async checkUserPaymentMethods(req, res) {
       return res.json({ hasPaymentMethod: false });
     }
 
-    // Verify payment method is still valid in Stripe
     if (user.hasValidPaymentMethod()) {
       try {
         const paymentMethod = await stripe.paymentMethods.retrieve(user.defaultPaymentMethodId);
@@ -296,7 +290,7 @@ async checkUserPaymentMethods(req, res) {
         }
       } catch (stripeError) {
         console.log('Stripe payment method verification failed:', stripeError.message);
-        // Clean up invalid payment method
+        
         user.hasPaymentMethod = false;
         user.defaultPaymentMethodId = null;
         user.savedPaymentMethods = user.savedPaymentMethods.filter(pm => pm.paymentMethodId !== user.defaultPaymentMethodId);
@@ -313,18 +307,55 @@ async checkUserPaymentMethods(req, res) {
 
 async tripSearch(req, res) {
   try {
-    const { pickup, dropoff, pickupTime, rideFor } = req.body;
+    const pickup = req.query.pickup || req.body.pickup || '';
+    const dropoff = req.query.dropoff || req.body.dropoff || req.query.destination || req.body.destination || '';
+    const pickupTime = req.query.time || req.body.time || req.query.pickupTime || req.body.pickupTime || '';
+    const date = req.query.date || req.body.date || '';
+    const rideFor = req.body.rideFor || 'me';
     
-    console.log('Trip search data:', { pickup, dropoff, pickupTime, rideFor });
+    const pickupLat = req.body.pickup_lat || req.query.pickup_lat;
+    const pickupLng = req.body.pickup_lng || req.query.pickup_lng;
+    const destinationLat = req.body.destination_lat || req.query.destination_lat;
+    const destinationLng = req.body.destination_lng || req.query.destination_lng;
+    
+    console.log('Trip search data:', { 
+      pickup, dropoff, pickupTime, rideFor, date,
+      pickupLat, pickupLng, destinationLat, destinationLng
+    });
     
     let dynamicRides = [];
     
     if (pickup && dropoff && pickup.trim() !== '' && dropoff.trim() !== '') {
-      const pickupCoords = this.findMockCoordinates(pickup, this.getMockLocations());
-      const dropoffCoords = this.findMockCoordinates(dropoff, this.getMockLocations());
+      let pickupCoords = null;
+      let dropoffCoords = null;
+      
+      if (pickupLat && pickupLng) {
+        pickupCoords = {
+          lat: parseFloat(pickupLat),
+          lng: parseFloat(pickupLng)
+        };
+      }
+      
+      if (destinationLat && destinationLng) {
+        dropoffCoords = {
+          lat: parseFloat(destinationLat),
+          lng: parseFloat(destinationLng)
+        };
+      }
+      
+      if (!pickupCoords) {
+        pickupCoords = this.findMockCoordinates(pickup, this.getMockLocations());
+      }
+      
+      if (!dropoffCoords) {
+        dropoffCoords = this.findMockCoordinates(dropoff, this.getMockLocations());
+      }
       
       if (pickupCoords && dropoffCoords) {
-        console.log('Using dynamic ride calculation with real coordinates');
+        console.log('Using coordinates for dynamic ride calculation:', {
+          pickup: pickupCoords,
+          dropoff: dropoffCoords
+        });
         dynamicRides = this.generateDynamicRides(pickupCoords, dropoffCoords);
       } else {
         console.log('Coordinates not found, using default rides');
@@ -345,7 +376,12 @@ async tripSearch(req, res) {
       pickup: pickup || '',
       dropoff: dropoff || '',
       pickupTime: pickupTime || 'now',
-      rideFor: rideFor || 'me'
+      date: date || '',
+      rideFor: rideFor || 'me',
+      pickupLat: pickupLat || '',
+      pickupLng: pickupLng || '',
+      destinationLat: destinationLat || '',
+      destinationLng: destinationLng || ''
     });
   } catch (error) {
     console.error('Trip Search Error:', error);
@@ -354,23 +390,23 @@ async tripSearch(req, res) {
   }
 }
 
-
-  async index(req, res) {
-    try {
-      const context = this.presenter.presentHomePage();
-      res.render('home', { 
-        ...context, 
-        user: req.oidc.user, 
-        userInformation: req.oidc,
-        isAuthenticated: req.oidc.isAuthenticated(),
-        
-      });
-    } catch (error) {
-      console.error('Home Controller Error:', error);
-      const errorContext = this.presenter.presentError(error);
-      res.status(500).render('home', errorContext);
-    }
+async index(req, res, formData = {}) {
+  try {
+    const context = this.presenter.presentHomePage();
+    res.render('home', { 
+      ...context, 
+      user: req.oidc.user, 
+      userInformation: req.oidc,
+      isAuthenticated: req.oidc.isAuthenticated(),
+      formData: formData 
+    });
+  } catch (error) {
+    console.error('Home Controller Error:', error);
+    const errorContext = this.presenter.presentError(error);
+    res.status(500).render('home', errorContext);
   }
+}
+
   async about(req, res) {
     try {
       const context = this.presenter.presentHomePage();
@@ -392,7 +428,9 @@ async tripSearch(req, res) {
 async trip(req, res) {
   try {
     const pickup = req.query.pickup || req.body.pickup || '';
-    const dropoff = req.query.dropoff || req.body.dropoff || '';
+    const dropoff = req.query.dropoff || req.body.dropoff || req.query.destination || req.body.destination || '';
+    const date = req.query.date || req.body.date || '';
+    const time = req.query.time || req.body.time || '';
     
     let dynamicRides = [];
     
@@ -419,7 +457,9 @@ async trip(req, res) {
       isAuthenticated: req.oidc.isAuthenticated(),
       ride: dynamicRides,
       pickup: pickup,
-      dropoff: dropoff
+      dropoff: dropoff,
+      date: date,
+      time: time
     });
   } catch (error) {
     console.error('Trip Method Error:', error);
@@ -446,7 +486,6 @@ async addPayment(req, res) {
 
     const { rideId, rideType, ridePrice, pickup, dropoff, scheduleDate, scheduleTime, useExistingCard } = req.body;
     
-    // Validation
     const missingFields = [];
     if (!rideId?.trim()) missingFields.push('rideId');
     if (!rideType?.trim()) missingFields.push('rideType');
@@ -469,7 +508,6 @@ async addPayment(req, res) {
     const priceValue = parseFloat(ridePrice.toString().replace(/[^\d.]/g, ''));
     const stripeAmount = Math.round(priceValue * 100);
 
-    // Create trip first
     const pickupCoords = this.findMockCoordinates(pickup, this.getMockLocations()) || { lat: 59.9139, lng: 10.7522 };
     const destCoords = this.findMockCoordinates(dropoff, this.getMockLocations()) || { lat: 60.1939, lng: 11.1004 };
     const distance = this.calculateDistance(pickupCoords, destCoords);
@@ -505,13 +543,11 @@ async addPayment(req, res) {
 
     const savedTrip = await newTrip.save();
 
-    // Check if user wants to use existing card and has valid one
     if (useExistingCard === 'true' && user?.hasValidPaymentMethod()) {
       console.log('Processing payment with saved card');
       return await this.processExistingCardPayment(savedTrip, user, req, res);
     }
 
-    // Create new payment method flow with setup mode
     console.log('Creating new payment method with setup mode');
     return await this.createNewPaymentMethodSetup(savedTrip, user, userEmail, stripeAmount, req, res);
 

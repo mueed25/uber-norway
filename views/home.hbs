@@ -1,9 +1,8 @@
 <div class="home-container">
-    <!-- Main Booking Interface -->
+
     <section class="booking-section">
         <div class="container">
             <div class="booking-layout">
-                <!-- Left Panel - Booking Form -->
                 <div class="booking-panel">
 
                     <div class="booking-form-container">
@@ -21,123 +20,87 @@
                         </div>
                         {{/if}}
 
-                        <form class="booking-form" action="/trip" method="POST" id="tripForm">
-
-                            <!-- Pickup Location -->
-                            <div class="form-group">
-                                <label for="pickup" class="form-label"></label>
-                                <div class="search-container">
-                                    
-                                    <input 
-                                        type="text" 
-                                        id="pickup" 
-                                        name="pickup" 
-                                        class="search-input"
-                                        placeholder="Enter pickup location"
-                                        value="{{formData.pickup}}"
-                                        aria-label="Pickup location"
-                                        required
-                                    />
-                                    
-                                </div>
-                            </div>
-
-                            <!-- Destination -->
-                            <div class="form-group">
-                                <label for="destination" class="form-label"></label>
-                                <div class="search-container">
-                                    
-                                    <input 
-                                        type="text" 
-                                        id="destination" 
-                                        name="destination" 
-                                        class="search-input"
-                                        placeholder="Enter destination"
-                                        value="{{formData.destination}}"
-                                        aria-label="Destination"
-                                        required
-                                    />
-                                
-                                </div>
-                            </div>
-
-                            <!-- Date and Time Row -->
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="date" class="form-label"></label>
-                                    <input 
-                                        type="date" 
-                                        id="date" 
-                                        name="date" 
-                                        class="form-input" 
-                                        value="{{formData.date}}"
-                                        required
-                                    >
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="time" class="form-label"></label>
-                                    <input 
-                                        type="time" 
-                                        id="time" 
-                                        name="time" 
-                                        class="form-input" 
-                                        value="{{formData.time}}"
-                                        required
-                                    >
-                                </div>
-
-
-                            </div>
-
-                            <!-- Submit Button -->
-                <div class="cta-row">
-                    {{#if user}}
-                        <!-- Show full-width button when user is logged in -->
-                        
-                        <button type="submit" class="btn btn-primary btn-sm">
-                        See prices
-                        </button>
-                    {{else}}
-                        <!-- Show login text when no user is logged in -->
-                        <a href="/login" class="btn btn-primary btn-sm">
-                        See prices
-                        </a>
-                    {{/if}}
-                    </div>
-
-
-                        </form>
-
-                        <!-- Trip Estimate Results -->
-                        {{#if tripEstimate}}
-                        <div class="trip-estimate">
-                            <div class="estimate-header">
-                                <h3>Trip Estimate</h3>
-                            </div>
-                            <div class="estimate-details">
-                                <div class="estimate-item">
-                                    <span class="estimate-label">Distance:</span>
-                                    <span class="estimate-value">{{tripEstimate.distance}} km</span>
-                                </div>
-                                <div class="estimate-item">
-                                    <span class="estimate-label">Duration:</span>
-                                    <span class="estimate-value">~{{tripEstimate.duration}} min</span>
-                                </div>
-                                <div class="estimate-item estimate-price">
-                                    <span class="estimate-label">Estimated Price:</span>
-                                    <span class="estimate-value price">{{tripEstimate.price}}</span>
-                                </div>
-                            </div>
-                            <button class="btn btn-success btn-large btn-full-width" id="bookTripBtn">
-                                Book Trip
-                            </button>
+                        {{#if (and formData.pickup formData.destination user)}}
+                        <div class="alert alert-info">
+                            <p>Welcome back! </p>
                         </div>
                         {{/if}}
+
+                        <form class="booking-form" action="/trip" method="POST" id="tripForm">
+
+    <div class="form-group">
+        <label for="pickup" class="form-label"></label>
+        <div class="search-container">
+            <input 
+                type="text" 
+                id="pickup" 
+                name="pickup" 
+                class="search-input"
+                placeholder="Enter pickup location"
+                value="{{formData.pickup}}"
+                aria-label="Pickup location"
+                required
+            />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="destination" class="form-label"></label>
+        <div class="search-container">
+            <input 
+                type="text" 
+                id="destination" 
+                name="destination" 
+                class="search-input"
+                placeholder="Enter destination"
+                value="{{formData.destination}}"
+                aria-label="Destination"
+                required
+            />
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="date" class="form-label"></label>
+            <input 
+                type="date" 
+                id="date" 
+                name="date" 
+                class="form-input" 
+                value="{{formData.date}}"
+                required
+            >
+        </div>
+        
+        <div class="form-group">
+            <label for="time" class="form-label"></label>
+            <input 
+                type="time" 
+                id="time" 
+                name="time" 
+                class="form-input" 
+                value="{{formData.time}}"
+                required
+            >
+        </div>
+    </div>
+
+    <div class="cta-row">
+        {{#if user}}
+            <button type="submit" class="btn btn-primary btn-sm">
+                See prices
+            </button>
+        {{else}}
+            <button type="submit" class="btn btn-primary btn-sm">
+                See prices
+            </button>
+        {{/if}}
+    </div>
+</form>
                     </div>
                 </div>
 
-                <!-- Right Panel - Map -->
                 <div class="map-panel">
                     <div id="map" class="map-container"></div>
                     {{#if tripEstimate}}
@@ -161,4 +124,58 @@
             </div>
         </div>
     </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('tripForm');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Form submitted');
+            
+            // Add a small delay to allow server processing
+            setTimeout(() => {
+                // Check if we're still on the same page after 2 seconds
+                // This suggests the server redirect didn't work
+                const currentUrl = window.location.href;
+                console.log('Current URL after submit:', currentUrl);
+                
+                // If still on home page, try client-side redirect
+                if (currentUrl.includes('localhost') || currentUrl.includes('your-domain.com')) {
+                    console.log('Server redirect may have failed, trying client-side login');
+                    // Force redirect to Auth0 login
+                    window.location.href = '/login';
+                }
+            }, 2000);
+        });
+    }
+});
+</script>
 </div>
+
+
+<style>
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.alert {
+    padding: 12px;
+    margin-bottom: 16px;
+    border-radius: 4px;
+}
+
+.alert-info {
+    background-color: #e3f2fd;
+    border: 1px solid #2196f3;
+    color: #1976d2;
+}
+
+.alert-error {
+    background-color: #ffebee;
+    border: 1px solid #f44336;
+    color: #c62828;
+}
+</style>

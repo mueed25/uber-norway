@@ -36,6 +36,7 @@ class TripHandler {
         this.forceHideMiddlePanel();
         await this.checkUserPaymentMethods();
         this.setupEnhancedPaymentHandling();
+        await this.handlePrePopulatedValues();
         
     }
     
@@ -127,6 +128,28 @@ if (this.scheduleConfirmBtn) {
     console.log('Middle panel forcefully hidden on initialization');
 }
 
+async handlePrePopulatedValues() {
+    if (this.pickupInput && this.pickupInput.value) {
+        console.log('Pre-populated pickup:', this.pickupInput.value);
+        try {
+            this.pickupLocation = await this.geocodeLocation(this.pickupInput.value);
+            console.log('Geocoded pickup:', this.pickupLocation);
+        } catch (error) {
+            console.error('Failed to geocode pickup:', error);
+        }
+    }
+    
+    if (this.dropoffInput && this.dropoffInput.value) {
+        console.log('Pre-populated dropoff:', this.dropoffInput.value);
+        try {
+            this.dropoffLocation = await this.geocodeLocation(this.dropoffInput.value);
+            console.log('Geocoded dropoff:', this.dropoffLocation);
+        } catch (error) {
+            console.error('Failed to geocode dropoff:', error);
+        }
+    }
+}
+
  async checkUserPaymentMethods() {
     try {
       const response = await fetch('/check-payment-methods', {
@@ -171,16 +194,59 @@ handleDropoffChange() {
     }
 }
     
-    setupLocationInputs() {
-        this.waitForGoogleMaps().then(() => {
-            this.setupRealAutocomplete(this.pickupInput, 'pickup');
-            this.setupRealAutocomplete(this.dropoffInput, 'dropoff');
-        }).catch(error => {
-            console.warn('Google Maps not available, falling back to basic input:', error);
-            this.setupBasicLocationInputs();
-        });
+    async setupLocationInputs() {
+    if (!window.google || !window.google.maps) {
+        console.log('Google Maps not loaded yet, waiting...');
+        setTimeout(() => this.setupLocationInputs(), 100);
+        return;
     }
-
+    
+    try {
+        // Setup pickup autocomplete
+        if (this.pickupInput) {
+            this.pickupAutocomplete = new google.maps.places.Autocomplete(this.pickupInput, {
+                types: ['establishment', 'geocode'],
+                componentRestrictions: { country: 'ng' }
+            });
+            
+            this.pickupAutocomplete.addListener('place_changed', () => {
+                const place = this.pickupAutocomplete.getPlace();
+                if (place.geometry) {
+                    this.pickupLocation = {
+                        lat: place.geometry.location.lat(),
+                        lng: place.geometry.location.lng(),
+                        address: place.formatted_address || place.name
+                    };
+                    console.log('Pickup location selected:', this.pickupLocation);
+                }
+            });
+        }
+        
+        if (this.dropoffInput) {
+            this.dropoffAutocomplete = new google.maps.places.Autocomplete(this.dropoffInput, {
+                types: ['establishment', 'geocode'],
+                componentRestrictions: { country: 'ng' }
+            });
+            
+            this.dropoffAutocomplete.addListener('place_changed', () => {
+                const place = this.dropoffAutocomplete.getPlace();
+                if (place.geometry) {
+                    this.dropoffLocation = {
+                        lat: place.geometry.location.lat(),
+                        lng: place.geometry.location.lng(),
+                        address: place.formatted_address || place.name
+                    };
+                    console.log('Dropoff location selected:', this.dropoffLocation);
+                }
+            });
+        }
+        
+        console.log('Autocomplete setup complete');
+        
+    } catch (error) {
+        console.error('Error setting up location inputs:', error);
+    }
+}
     handleScheduleToggle(e) {
     if (e.target.value === 'scheduled') {
         this.showScheduleCard();
@@ -218,7 +284,7 @@ setMinDateTime() {
     }
     
     if (this.scheduleTimeInput) {
-        const minTime = new Date(now.getTime() + 15 * 60000); // 15 minutes from now
+        const minTime = new Date(now.getTime() + 15 * 60000); 
         this.scheduleTimeInput.value = minTime.toTimeString().slice(0, 5);
     }
 }
@@ -705,12 +771,12 @@ capitalizeFirst(str) {
         }
     }
     
-    async handleSearch(e) {
+ async handleSearch(e) {
     e.preventDefault();
     const formData = new FormData(this.form);
     const pickup = formData.get('pickup').trim();
     const dropoff = formData.get('dropoff').trim();
-    const pickupTimeType = formData.get('pickupTime'); // This gets 'now' or 'scheduled'
+    const pickupTimeType = formData.get('pickupTime');
     
     if (!pickup) {
         this.showError('Please enter a pickup location');
@@ -729,7 +795,6 @@ capitalizeFirst(str) {
         return;
     }
     
-    // Check if scheduled ride but no schedule data
     if (pickupTimeType === 'scheduled' && !this.scheduleData) {
         this.showError('Please confirm your schedule or select "Pick up now"');
         return;
@@ -739,13 +804,18 @@ capitalizeFirst(str) {
         this.showLoading(true);
         this.setButtonLoading(true);
         
-        if (!this.pickupLocation) {
+        if (!this.pickupLocation || !this.pickupLocation.lat || !this.pickupLocation.lng) {
+            console.log('Geocoding pickup location:', pickup);
             this.pickupLocation = await this.geocodeLocation(pickup);
         }
         
-        if (!this.dropoffLocation) {
+        if (!this.dropoffLocation || !this.dropoffLocation.lat || !this.dropoffLocation.lng) {
+            console.log('Geocoding dropoff location:', dropoff);
             this.dropoffLocation = await this.geocodeLocation(dropoff);
         }
+        
+        console.log('Final pickup location:', this.pickupLocation);
+        console.log('Final dropoff location:', this.dropoffLocation);
         
         if (this.mapHandler) {
             this.mapHandler.handleLocationUpdate('pickup', this.pickupLocation, pickup);
@@ -776,6 +846,32 @@ capitalizeFirst(str) {
         this.showLoading(false);
         this.setButtonLoading(false);
     }
+}
+
+async geocodeLocation(address) {
+    return new Promise((resolve, reject) => {
+        if (!window.google || !window.google.maps) {
+            reject(new Error('Google Maps not loaded'));
+            return;
+        }
+        
+        const geocoder = new google.maps.Geocoder();
+        
+        geocoder.geocode({ address: address }, (results, status) => {
+            if (status === 'OK' && results[0]) {
+                const location = {
+                    lat: results[0].geometry.location.lat(),
+                    lng: results[0].geometry.location.lng(),
+                    address: results[0].formatted_address
+                };
+                console.log('Geocoded location:', location);
+                resolve(location);
+            } else {
+                console.error('Geocoding failed:', status);
+                reject(new Error('Failed to geocode location: ' + address));
+            }
+        });
+    });
 }
     
     async searchRides(searchParams) {

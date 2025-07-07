@@ -1,10 +1,6 @@
-/**
- * Application Constants
- * Centralized location for all app-wide constants
- */
+
 
 module.exports = {
-  // Trip Status Constants
   TRIP_STATUS: {
     PENDING: 'pending',
     CONFIRMED: 'confirmed',
@@ -13,15 +9,12 @@ module.exports = {
     CANCELLED: 'cancelled'
   },
 
-  // Vehicle Types
   VEHICLE_TYPES: {
     UBER_X: 'uberx',
     UBER_XL: 'uberxl',
     UBER_BLACK: 'uberblack',
     UBER_POOL: 'uberpool'
   },
-
-  // Vehicle Type Display Names
   VEHICLE_TYPE_NAMES: {
     uberx: 'UberX',
     uberxl: 'UberXL',
@@ -29,7 +22,6 @@ module.exports = {
     uberpool: 'Uber Pool'
   },
 
-  // Pricing Configuration
   PRICING: {
     BASE_FARE: {
       uberx: 2.50,
@@ -57,28 +49,24 @@ module.exports = {
     }
   },
 
-  // Time Constants
   TIME: {
-    BOOKING_TIMEOUT: 5 * 60 * 1000, // 5 minutes in milliseconds
-    DRIVER_ARRIVAL_WINDOW: 15 * 60 * 1000, // 15 minutes
-    TRIP_COMPLETION_TIMEOUT: 4 * 60 * 60 * 1000 // 4 hours
+    BOOKING_TIMEOUT: 5 * 60 * 1000,
+    DRIVER_ARRIVAL_WINDOW: 15 * 60 * 1000, 
+    TRIP_COMPLETION_TIMEOUT: 4 * 60 * 60 * 1000 
   },
 
-  // Distance Constants (in kilometers)
   DISTANCE: {
-    MAX_PICKUP_RADIUS: 50, // Maximum distance for pickup
-    MIN_TRIP_DISTANCE: 0.5, // Minimum trip distance
-    MAX_TRIP_DISTANCE: 200 // Maximum trip distance
+    MAX_PICKUP_RADIUS: 50, 
+    MIN_TRIP_DISTANCE: 0.5, 
+    MAX_TRIP_DISTANCE: 200 
   },
 
-  // Payment Methods
   PAYMENT_METHODS: {
     CASH: 'cash',
     CARD: 'card',
     DIGITAL_WALLET: 'digital_wallet'
   },
 
-  // Payment Status
   PAYMENT_STATUS: {
     PENDING: 'pending',
     COMPLETED: 'completed',
@@ -86,14 +74,12 @@ module.exports = {
     REFUNDED: 'refunded'
   },
 
-  // User Roles
   USER_ROLES: {
     RIDER: 'rider',
     DRIVER: 'driver',
     ADMIN: 'admin'
   },
 
-  // Driver Status
   DRIVER_STATUS: {
     OFFLINE: 'offline',
     ONLINE: 'online',
@@ -101,7 +87,6 @@ module.exports = {
     BREAK: 'break'
   },
 
-  // Notification Types
   NOTIFICATION_TYPES: {
     TRIP_REQUEST: 'trip_request',
     TRIP_CONFIRMED: 'trip_confirmed',
@@ -111,7 +96,6 @@ module.exports = {
     PAYMENT_COMPLETED: 'payment_completed'
   },
 
-  // API Response Codes
   RESPONSE_CODES: {
     SUCCESS: 200,
     CREATED: 201,
@@ -122,7 +106,6 @@ module.exports = {
     INTERNAL_ERROR: 500
   },
 
-  // API Response Messages
   RESPONSE_MESSAGES: {
     SUCCESS: 'Operation completed successfully',
     TRIP_CREATED: 'Trip booked successfully',
@@ -133,7 +116,6 @@ module.exports = {
     INVALID_INPUT: 'Invalid input data provided'
   },
 
-  // Validation Rules
   VALIDATION: {
     MIN_PASSWORD_LENGTH: 8,
     MAX_PASSWORD_LENGTH: 128,
@@ -143,12 +125,11 @@ module.exports = {
     EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   },
 
-  // Map Configuration
   MAP_CONFIG: {
     DEFAULT_ZOOM: 13,
     DEFAULT_CENTER: {
       lat: 6.5244,
-      lng: 3.3792 // Lagos, Nigeria
+      lng: 3.3792 
     },
     MARKER_COLORS: {
       PICKUP: '#00ff00',
@@ -157,25 +138,22 @@ module.exports = {
     }
   },
 
-  // File Upload Limits
   UPLOAD_LIMITS: {
     MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
     ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/gif'],
     ALLOWED_DOCUMENT_TYPES: ['application/pdf', 'image/jpeg', 'image/png']
   },
 
-  // Rate Limiting
   RATE_LIMITS: {
     TRIP_REQUESTS_PER_HOUR: 20,
     API_REQUESTS_PER_MINUTE: 100,
     LOGIN_ATTEMPTS_PER_HOUR: 5
   },
 
-  // Cache TTL (Time To Live) in seconds
   CACHE_TTL: {
-    USER_SESSION: 24 * 60 * 60, // 24 hours
-    TRIP_DATA: 60 * 60, // 1 hour
-    PRICING_DATA: 30 * 60, // 30 minutes
-    LOCATION_DATA: 5 * 60 // 5 minutes
+    USER_SESSION: 24 * 60 * 60, 
+    TRIP_DATA: 60 * 60,
+    PRICING_DATA: 30 * 60, 
+    LOCATION_DATA: 5 * 60 
   }
 };

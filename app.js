@@ -8,6 +8,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 require('dotenv').config();
 const { auth } = require('express-openid-connect');
+const session = require('express-session');
 
 const User = require('./models/User');
 
@@ -87,8 +88,28 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 connectDatabase();
-
 app.use(auth(config));
+
+app.get('/login', (req, res) => {
+  res.oidc.login({
+    returnTo: '/',
+    authorizationParams: {
+      screen_hint: 'login'
+    }
+  });
+});
+
+app.use(session({
+  secret: process.env.SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+
 
 app.use((req, res, next) => {
   if (req.oidc.isAuthenticated()) {
@@ -179,6 +200,8 @@ app.use((req, res) => {
     error: { status: 404, message: 'The page you are looking for does not exist.' }
   });
 });
+
+
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
